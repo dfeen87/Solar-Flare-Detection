@@ -187,6 +187,7 @@ See `CITATIONS.md` for full data references.
 ├── CHANGELOG.md                    # Version history and release notes
 ├── CITATIONS.md                    # Scientific references and data sources
 ├── CONTRIBUTING.md                 # Contribution guidelines
+├── SECURITY.md                     # Software Requirement
 ├── LICENSE                         # MIT license for open-source use
 ├── PAPER.md                        # Companion research paper draft
 ├── requirements.txt                # Python dependencies
