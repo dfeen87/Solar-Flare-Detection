@@ -52,6 +52,7 @@ from shared.math_utils import (
     rolling_correlation,
     normalize_01,
     classify_regime,
+    compute_delta_phi,
     REGIME_BOUNDS,
     REGIME_COLORS,
     REGIME_LABELS,
@@ -104,13 +105,8 @@ def main():
     I = rolling_variance(X, WINDOW_L)     # informational complexity
     C = rolling_correlation(X, EUV, WINDOW_L)  # cross-channel coherence
 
-    # --- First differences ---
-    dS = np.abs(np.diff(S, prepend=np.nan))
-    dI = np.abs(np.diff(I, prepend=np.nan))
-    dC = np.abs(np.diff(C, prepend=np.nan))
-
-    # --- ΔΦ(t) — PAPER.md Eq. (6) ---
-    delta_phi = ALPHA * dS + BETA * dI + GAMMA * dC
+    # --- First differences & ΔΦ(t) — PAPER.md Eq. (6) ---
+    delta_phi = compute_delta_phi(S, I, C, ALPHA, BETA, GAMMA)
 
     # --- Normalize to [0, 1] before applying thresholds ---
     delta_phi_norm = normalize_01(delta_phi)

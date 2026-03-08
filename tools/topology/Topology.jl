@@ -6,7 +6,7 @@ Implements:
   - compute_chi:         χ(t) = ∫ Var_L[B] dt (cumulative integral) (PAPER.md §6.3)
   - MemoryState:         container for the χ(t) memory variable
 
-All function bodies are stubs pending full implementation.
+All functions are fully implemented.
 """
 module Topology
 

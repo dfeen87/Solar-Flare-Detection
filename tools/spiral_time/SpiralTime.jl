@@ -8,7 +8,7 @@ Implements:
   - classify_regime: regime classification from ΔΦ threshold table     (PAPER.md §6.4)
   - compute_psi: phase–memory embedding construction                   (PAPER.md Eq. 7)
 
-All function bodies are stubs pending full implementation.
+All functions are fully implemented.
 """
 module SpiralTime
 

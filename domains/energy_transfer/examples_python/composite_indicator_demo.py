@@ -38,7 +38,7 @@ _REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..",
 sys.path.insert(0, _REPO_ROOT)
 
 from shared.data_loader import load_xray_flux, load_magnetometer, load_euvs
-from shared.math_utils import rolling_variance, euv_derivative, normalize_01
+from shared.math_utils import rolling_variance, euv_derivative, normalize_01, compute_composite_indicator
 
 # ---------------------------------------------------------------------------
 # Configuration
@@ -91,7 +91,7 @@ def main():
     d_euv_n = normalize_01(d_euv)
 
     # --- Composite indicator I(t) — PAPER.md Eq. (5) ---
-    indicator = W1 * var_x_n + W2 * var_b_n + W3 * d_euv_n
+    indicator = compute_composite_indicator(var_x_n, var_b_n, d_euv_n, W1, W2, W3)
 
     # ---------------------------------------------------------------------------
     # Plot

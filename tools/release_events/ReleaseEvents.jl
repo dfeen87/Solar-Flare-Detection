@@ -6,7 +6,7 @@ Implements:
   - compute_lead_times: lead-time analysis comparing precursor peaks to flare onset
   - overlay_events:   prepare event overlay data for visualization
 
-All function bodies are stubs pending full implementation.
+All functions are fully implemented.
 """
 module ReleaseEvents
 
