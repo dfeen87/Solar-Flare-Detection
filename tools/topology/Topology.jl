@@ -57,7 +57,14 @@ Vector of rolling-variance values; first L-1 entries are NaN.
 References: PAPER.md Eq. (3); §6.2 S(t) proxy definition.
 """
 function rolling_variance_B(B::Vector{Float64}, L::Int)
-    error("Not yet implemented")
+    n = length(B)
+    out = fill(NaN, n)
+    for i in L:n
+        window = B[i-L+1:i]
+        m = sum(window) / L
+        out[i] = sum((window .- m).^2) / L
+    end
+    return out
 end
 
 """
@@ -83,7 +90,23 @@ Vector of χ(t) values (cumulative integral), same length as `var_B`.
 References: PAPER.md §6.3; Eq. (7) for role in ψ(t).
 """
 function compute_chi(var_B::Vector{Float64}, dt::Float64)
-    error("Not yet implemented")
+    n = length(var_B)
+    out = fill(NaN, n)
+    # Find first non-NaN index (start of valid data after window fills)
+    start = findfirst(!isnan, var_B)
+    if start === nothing
+        return out
+    end
+    out[start] = 0.0
+    for i in start+1:n
+        # NaN variance values (pre-window region) are treated as 0 for integration;
+        # this preserves the intent of χ(t) as accumulated magnetic stress from
+        # the first valid sample onward. See PAPER.md §6.3.
+        v_prev = isnan(var_B[i-1]) ? 0.0 : var_B[i-1]
+        v_curr = isnan(var_B[i])   ? 0.0 : var_B[i]
+        out[i] = out[i-1] + 0.5 * (v_prev + v_curr) * dt
+    end
+    return out
 end
 
 end  # module Topology

@@ -35,6 +35,7 @@ _REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..",
 sys.path.insert(0, _REPO_ROOT)
 
 from shared.data_loader import load_xray_flux, load_xray_flares
+from shared.math_utils import rolling_variance
 
 # ---------------------------------------------------------------------------
 # Configuration
@@ -52,19 +53,6 @@ CLASS_COLORS = {
 
 OUTPUT_DIR = os.path.join(os.path.dirname(__file__), "output")
 OUTPUT_FILE = os.path.join(OUTPUT_DIR, "flare_overlay_demo.png")
-
-
-# ---------------------------------------------------------------------------
-# Helper functions
-# ---------------------------------------------------------------------------
-
-def rolling_variance(series: np.ndarray, L: int) -> np.ndarray:
-    """Compute rolling variance Var_L[X](t) per PAPER.md Eq. (3)."""
-    result = np.full_like(series, np.nan)
-    for i in range(L - 1, len(series)):
-        window = series[i - L + 1: i + 1]
-        result[i] = np.mean((window - np.mean(window)) ** 2)
-    return result
 
 
 # ---------------------------------------------------------------------------

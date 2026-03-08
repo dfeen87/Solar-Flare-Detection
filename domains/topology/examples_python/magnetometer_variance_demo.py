@@ -36,6 +36,7 @@ _REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..",
 sys.path.insert(0, _REPO_ROOT)
 
 from shared.data_loader import load_magnetometer
+from shared.math_utils import rolling_variance, compute_chi
 
 # ---------------------------------------------------------------------------
 # Configuration
@@ -44,35 +45,6 @@ WINDOW_L = 30   # rolling-variance window length (data points)
 
 OUTPUT_DIR = os.path.join(os.path.dirname(__file__), "output")
 OUTPUT_FILE = os.path.join(OUTPUT_DIR, "magnetometer_variance_demo.png")
-
-
-# ---------------------------------------------------------------------------
-# Helper functions
-# ---------------------------------------------------------------------------
-
-def rolling_variance(series: np.ndarray, L: int) -> np.ndarray:
-    """Compute rolling variance Var_L[B](t) per PAPER.md Eq. (3)."""
-    result = np.full_like(series, np.nan)
-    for i in range(L - 1, len(series)):
-        window = series[i - L + 1: i + 1]
-        result[i] = np.mean((window - np.mean(window)) ** 2)
-    return result
-
-
-def compute_chi(var_b: np.ndarray) -> np.ndarray:
-    """Compute memory variable χ(t) as cumulative integral of Var_L[B].
-
-    Uses the trapezoidal rule (numpy.nancumsum) for numerical integration.
-    NaN values at the beginning (before window is full) are propagated.
-
-    References: PAPER.md §6.3 — χ(t) memory variable.
-    """
-    # Replace NaN with 0 for integration purposes (pre-window region)
-    integrand = np.where(np.isnan(var_b), 0.0, var_b)
-    chi = np.cumsum(integrand)
-    # Mask the initial NaN region to maintain consistency with var_b
-    chi[:WINDOW_L - 1] = np.nan
-    return chi
 
 
 # ---------------------------------------------------------------------------
@@ -94,7 +66,7 @@ def main():
     var_b = rolling_variance(B, WINDOW_L)
 
     # --- Memory variable χ(t) ---
-    chi = compute_chi(var_b)
+    chi = compute_chi(var_b, WINDOW_L)
 
     # ---------------------------------------------------------------------------
     # Plot

@@ -37,7 +37,14 @@ Vector of rolling-variance values, same length as `x`.
 References: PAPER.md Eq. (3).
 """
 function rolling_variance(x::Vector{Float64}, L::Int)
-    error("Not yet implemented")
+    n = length(x)
+    out = fill(NaN, n)
+    for i in L:n
+        window = x[i-L+1:i]
+        m = sum(window) / L
+        out[i] = sum((window .- m).^2) / L
+    end
+    return out
 end
 
 """
@@ -64,7 +71,7 @@ Vector of I(t) values in [0, 1].
 References: PAPER.md Eq. (5).
 """
 function composite_indicator(var_x, var_b, d_euv; w1=1/3, w2=1/3, w3=1/3)
-    error("Not yet implemented")
+    return w1 .* var_x .+ w2 .* var_b .+ w3 .* d_euv
 end
 
 """
@@ -88,7 +95,21 @@ Vector of |d/dt EUV| values, same length as `euv`.
 References: PAPER.md Eq. (5) — third term.
 """
 function euv_derivative(euv::Vector{Float64}, dt::Float64)
-    error("Not yet implemented")
+    n = length(euv)
+    out = Vector{Float64}(undef, n)
+    if n == 1
+        out[1] = 0.0
+        return out
+    end
+    # One-sided forward difference for first point
+    out[1] = abs((euv[2] - euv[1]) / dt)
+    # Central differences for interior points
+    for i in 2:n-1
+        out[i] = abs((euv[i+1] - euv[i-1]) / (2 * dt))
+    end
+    # One-sided backward difference for last point
+    out[n] = abs((euv[n] - euv[n-1]) / dt)
+    return out
 end
 
 end  # module EnergyTransfer

@@ -82,7 +82,15 @@ Vector of ΔΦ values, same length as inputs.
 References: PAPER.md Eq. (6).
 """
 function compute_delta_phi(S, I, C; α=1/3, β=1/3, γ=1/3)
-    error("Not yet implemented")
+    n = length(S)
+    out = fill(NaN, n)
+    for i in 2:n
+        dS = abs(S[i] - S[i-1])
+        dI = abs(I[i] - I[i-1])
+        dC = abs(C[i] - C[i-1])
+        out[i] = α * dS + β * dI + γ * dC
+    end
+    return out
 end
 
 """
@@ -107,7 +115,15 @@ Returns
 References: PAPER.md §6.4.
 """
 function classify_regime(delta_phi::Float64)
-    error("Not yet implemented")
+    if delta_phi < 0.15
+        return RegimeClassification(:isostasis)
+    elseif delta_phi < 0.35
+        return RegimeClassification(:allostasis)
+    elseif delta_phi < 0.40
+        return RegimeClassification(:high_allostasis)
+    else
+        return RegimeClassification(:collapse)
+    end
 end
 
 """
@@ -128,7 +144,7 @@ Returns
 References: PAPER.md Eq. (7).
 """
 function compute_psi(t::Float64, phi::Float64, chi::Float64)
-    error("Not yet implemented")
+    return PhaseMemoryState(t, phi, chi)
 end
 
 end  # module SpiralTime

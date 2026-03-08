@@ -47,6 +47,15 @@ _REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..",
 sys.path.insert(0, _REPO_ROOT)
 
 from shared.data_loader import load_xray_flux, load_magnetometer, load_euvs
+from shared.math_utils import (
+    rolling_variance,
+    rolling_correlation,
+    normalize_01,
+    classify_regime,
+    REGIME_BOUNDS,
+    REGIME_COLORS,
+    REGIME_LABELS,
+)
 
 # ---------------------------------------------------------------------------
 # Configuration
@@ -54,57 +63,8 @@ from shared.data_loader import load_xray_flux, load_magnetometer, load_euvs
 WINDOW_L = 30          # rolling-variance window length (data points)
 ALPHA = BETA = GAMMA = 1 / 3   # equal weighting — placeholder (see PAPER.md §6.4)
 
-REGIME_BOUNDS = [0.15, 0.35, 0.40]   # normalized ΔΦ thresholds (PAPER.md §6.4)
-REGIME_COLORS = ["#2ecc71", "#f1c40f", "#e67e22", "#e74c3c"]
-REGIME_LABELS = ["Isostasis", "Allostasis", "High-Allostasis", "Collapse"]
-
 OUTPUT_DIR = os.path.join(os.path.dirname(__file__), "output")
 OUTPUT_FILE = os.path.join(OUTPUT_DIR, "variance_and_regime_demo.png")
-
-
-# ---------------------------------------------------------------------------
-# Helper functions
-# ---------------------------------------------------------------------------
-
-def rolling_variance(series: np.ndarray, L: int) -> np.ndarray:
-    """Compute rolling variance Var_L[X](t) per PAPER.md Eq. (3)."""
-    result = np.full_like(series, np.nan)
-    for i in range(L - 1, len(series)):
-        window = series[i - L + 1: i + 1]
-        result[i] = np.mean((window - np.mean(window)) ** 2)
-    return result
-
-
-def rolling_correlation(x: np.ndarray, y: np.ndarray, L: int) -> np.ndarray:
-    """Pearson correlation of x and y over a rolling window of length L."""
-    result = np.full_like(x, np.nan)
-    for i in range(L - 1, len(x)):
-        wx = x[i - L + 1: i + 1]
-        wy = y[i - L + 1: i + 1]
-        if np.std(wx) > 0 and np.std(wy) > 0:
-            result[i] = np.corrcoef(wx, wy)[0, 1]
-        else:
-            result[i] = 0.0
-    return result
-
-
-def normalize_01(arr: np.ndarray) -> np.ndarray:
-    """Min-max normalize array to [0, 1], ignoring NaNs."""
-    lo, hi = np.nanmin(arr), np.nanmax(arr)
-    if hi == lo:
-        return np.zeros_like(arr)
-    return (arr - lo) / (hi - lo)
-
-
-def classify_regime(delta_phi_norm: float) -> str:
-    """Map normalized ΔΦ value to regime label (PAPER.md §6.4)."""
-    if delta_phi_norm < 0.15:
-        return "Isostasis"
-    if delta_phi_norm < 0.35:
-        return "Allostasis"
-    if delta_phi_norm < 0.40:
-        return "High-Allostasis"
-    return "Collapse"
 
 
 # ---------------------------------------------------------------------------
