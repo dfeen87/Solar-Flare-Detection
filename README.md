@@ -200,6 +200,7 @@ See `CITATIONS.md` for full data references.
 ├── CONTRIBUTING.md                      # Contribution guidelines and workflow
 ├── SECURITY.md                          # Security policy and supported versions
 ├── LICENSE                              # MIT license for open-source use
+├── PEER_REVIEW                          # Code review for Peer Review
 ├── PAPER.md                             # Companion research paper draft (Krüger & Feeney, 2026)
 ├── requirements.txt                     # Python runtime dependencies
 │
