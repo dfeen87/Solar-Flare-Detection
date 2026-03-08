@@ -31,7 +31,7 @@ regions, capturing the non-Markovian memory of the pre-flare corona.
 
 ## Data
 
-- Source: GOES magnetometer — `assets/data/magnetometers/magnetometers-7-day.json`
+- Source: GOES magnetometer — fetched via `shared/data_loader.py` (`magnetometers-7-day.json`)
 - Channel: He (parallel component) — the most relevant proxy for B(t)
 
 ## Running the Example

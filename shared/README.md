@@ -8,7 +8,7 @@ This directory contains the shared Python utilities used by every domain demo an
 
 ### `data_loader.py`
 
-Loads the five GOES data products from local cache (`assets/data/`) or, if no cache is found, fetches them live from the NOAA SWPC JSON feeds.
+Loads the five GOES data products from the NOAA SWPC JSON feeds. A local file cache is also supported: if the JSON files are present at `assets/data/`, they will be used instead of the network request.
 
 | Function | Returns | GOES product |
 |---|---|---|

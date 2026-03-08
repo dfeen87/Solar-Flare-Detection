@@ -100,8 +100,7 @@ Every new domain **must** include:
 - A **Julia computational module** (`tools/<name>/`) that mirrors the Python
   math in a high-performance stub (function signatures + docstrings; full
   implementation may follow in a subsequent PR).
-- Any required data sourced from or cached under `assets/data/` (see
-  `shared/data_loader.py` for the loading pattern).
+- Any required data fetched via `shared/data_loader.py` (which pulls from the NOAA SWPC API).
 
 ---
 

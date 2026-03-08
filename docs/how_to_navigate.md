@@ -57,12 +57,6 @@
 │   ├── overview.md                 # Project overview (this area)
 │   ├── how_to_navigate.md          # This file
 │   └── glossary.md                 # Scientific glossary
-│
-└── assets/
-    └── data/                       # GOES data (fetched from NOAA at runtime)
-        ├── xray/
-        ├── magnetometers/
-        └── euvs/
 ```
 
 ---
@@ -132,8 +126,8 @@ future PR.
 
 ```
 NOAA SWPC API  ──→  shared/data_loader.py  ──→  domain Python scripts  ──→  output figures
-assets/data/                                     (rolling variance,
-(local cache)                                     ΔΦ, I(t), χ(t), events)
+                                                 (rolling variance,
+                                                  ΔΦ, I(t), χ(t), events)
 ```
 
 ---
