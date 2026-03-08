@@ -228,11 +228,11 @@ See `CITATIONS.md` for full data references.
 │   ├── test_topology.jl            # Julia tests for Topology module
 │   └── test_release_events.jl      # Julia tests for ReleaseEvents module
 │
-├── docs/                           # Documentation and educational material
-│   ├── overview.md                 # High-level project overview
-│   ├── how_to_navigate.md          # Guide to repo structure and workflow
-│   ├── glossary.md                 # Definitions of scientific terms
-│   └── diagrams/                   # Supporting diagrams and illustrations
+└── docs/                           # Documentation and educational material
+    ├── overview.md                 # High-level project overview
+    ├── how_to_navigate.md          # Guide to repo structure and workflow
+    ├── glossary.md                 # Definitions of scientific terms
+    └── diagrams/                   # Supporting diagrams and illustrations
 
 ```
 
