@@ -83,9 +83,9 @@ def _load_flare_times():
     df = load_xray_flares()
     onset_times = []
     for _, row in df.iterrows():
-        t = row["time_begin"] if row["time_begin"] is not None else row["time_max"]
-        if t is not None:
-            onset_times.append(t)
+        onset_time = row["time_begin"] if row["time_begin"] is not None else row["time_max"]
+        if onset_time is not None:
+            onset_times.append(onset_time)
     return onset_times
 
 
@@ -250,5 +250,5 @@ if __name__ == "__main__":
     p8 = make_fig8(times, flux, flare_times)
 
     print("\nSaved figures:")
-    for p in (p6, p7, p8):
-        print(os.path.abspath(p))
+    for path in (p6, p7, p8):
+        print(os.path.abspath(path))
