@@ -182,62 +182,107 @@ See `CITATIONS.md` for full data references.
 ## Repository Structure
 
 ```
-.                                   # Root of the Solar Flare Detection repository
-├── README.md                       # Project overview, structure, usage
-├── CHANGELOG.md                    # Version history and release notes
-├── CITATIONS.md                    # Scientific references and data sources
-├── CONTRIBUTING.md                 # Contribution guidelines
-├── SECURITY.md                     # Software Requirement
-├── LICENSE                         # MIT license for open-source use
-├── PAPER.md                        # Companion research paper draft
-├── requirements.txt                # Python dependencies
-├── .github/                        # GitHub automation and CI configuration
-│   └── workflows/                  # Continuous integration pipelines
-│       ├── ci.yml                  # Main CI pipeline (lint / import check)
-│       ├── python-tests.yml        # Python test suite (3.10 / 3.11 / 3.12)
-│       └── julia-tests.yml         # Julia test suite (1.10 / 1 latest stable)
+.                                        # Root of the Solar Flare Detection repository
+├── README.md                            # Project overview, structure, and usage
+├── CHANGELOG.md                         # Version history and release notes
+├── CITATIONS.md                         # Scientific references and data sources
+├── CODE_OF_CONDUCT.md                   # Community standards (Contributor Covenant)
+├── CONTRIBUTING.md                      # Contribution guidelines and workflow
+├── SECURITY.md                          # Security policy and supported versions
+├── LICENSE                              # MIT license for open-source use
+├── PAPER.md                             # Companion research paper draft (Krüger & Feeney, 2026)
+├── requirements.txt                     # Python runtime dependencies
 │
-├── shared/                         # Shared Python utilities and Julia helpers
-│   ├── __init__.py                 # Python package init
-│   ├── math_utils.py               # Core mathematical functions
-│   ├── data_loader.py              # GOES/EUVS data loading helpers
-│   ├── plot_utils.py               # Plotting utilities
-│   ├── DataLoader.jl               # Julia data-loading helper
-│   ├── MathUtils.jl                # Julia shared math utilities (normalize_01, rolling_correlation)
-│   └── README.md                   # Shared layer documentation
+├── .github/                             # GitHub automation and CI configuration
+│   └── workflows/                       # Continuous integration pipelines
+│       ├── ci.yml                       # Main CI pipeline (lint / import check)
+│       ├── python-tests.yml             # Python test suite (3.10 / 3.11 / 3.12)
+│       └── julia-tests.yml              # Julia test suite (1.10 / latest stable)
 │
-├── domains/                        # Domain logic and educational examples
-│   ├── spiral_time/                # ψ(t), ΔΦ(t), regime classification
-│   ├── energy_transfer/            # Multi-channel composite indicator I(t)
-│   ├── topology/                   # Magnetometer variance, memory variable χ(t)
-│   └── release_events/             # Flare event overlays, lead-time analysis
+├── shared/                              # Shared utilities used by all domains
+│   ├── __init__.py                      # Python package init
+│   ├── data_loader.py                   # GOES/EUVS data loading (local cache + NOAA API fallback)
+│   ├── math_utils.py                    # Core math: rolling_variance, rolling_correlation,
+│   │                                    #   compute_delta_phi, classify_regime, compute_chi, …
+│   ├── plot_utils.py                    # Reusable matplotlib helpers (flare overlay, ΔΦ bands, …)
+│   ├── DataLoader.jl                    # Julia mirror of data_loader.py
+│   ├── MathUtils.jl                     # Julia mirror of math_utils.py (normalize_01, …)
+│   └── README.md                        # Shared layer API documentation
 │
-├── tools/                          # High-performance Julia modules
-│   ├── run_pipeline.jl             # End-to-end Julia analysis pipeline
-│   ├── spiral_time/                # Julia models for spiral-time dynamics
-│   ├── energy_transfer/            # Julia models for energy distribution
-│   ├── topology/                   # Julia models for magnetic topology
-│   └── release_events/             # Julia models for flare event analysis
+├── domains/                             # Domain-scoped Python examples (educational layer)
+│   │
+│   ├── spiral_time/                     # ψ(t) phase–memory embedding and regime classification
+│   │   ├── README.md                    # Domain overview and equations
+│   │   └── examples_python/
+│   │       ├── full_pipeline_demo.py    # Complete 10-step PAPER.md pipeline (real GOES data)
+│   │       ├── make_goes_figures.py     # Publication figures 6–8: flux, variance, flare overlay
+│   │       ├── synthetic_pipeline_numbers.py  # Synthetic 7-day dataset; prints numerical tables
+│   │       ├── variance_and_regime_demo.py    # ΔΦ(t) and regime classification walkthrough
+│   │       └── output/                  # Generated figures (git-ignored except .gitkeep)
+│   │
+│   ├── energy_transfer/                 # Composite instability indicator I(t)
+│   │   ├── README.md                    # Domain overview and equations
+│   │   └── examples_python/
+│   │       ├── composite_indicator_demo.py    # I(t) from X-ray, magnetometer, and EUV channels
+│   │       └── output/
+│   │
+│   ├── topology/                        # Magnetic topology and memory variable χ(t)
+│   │   ├── README.md                    # Domain overview and equations
+│   │   └── examples_python/
+│   │       ├── magnetometer_variance_demo.py  # Var_L[B](t) rolling variance and χ(t) cumulation
+│   │       └── output/
+│   │
+│   └── release_events/                  # Flare event overlay and lead-time analysis
+│       ├── README.md                    # Domain overview and equations
+│       └── examples_python/
+│           ├── flare_overlay_demo.py    # Flare catalogue {tₖ} overlaid on flux and variance
+│           └── output/
 │
-├── test/                           # Automated test suite
-│   ├── conftest.py                 # pytest configuration (sys.path setup)
-│   ├── test_math_utils.py          # Unit tests for shared/math_utils.py
-│   ├── test_data_loader.py         # Smoke tests for shared/data_loader.py
-│   ├── test_plot_utils.py          # Smoke tests for shared/plot_utils.py
-│   ├── test_integration_pipeline.py # End-to-end pipeline integration test
-│   ├── runtests.jl                 # Julia master test runner
-│   ├── test_math_utils.jl          # Julia tests for MathUtils module
-│   ├── test_spiral_time.jl         # Julia tests for SpiralTime module
-│   ├── test_energy_transfer.jl     # Julia tests for EnergyTransfer module
-│   ├── test_topology.jl            # Julia tests for Topology module
-│   └── test_release_events.jl      # Julia tests for ReleaseEvents module
+├── tools/                               # High-performance Julia computational modules
+│   ├── run_pipeline.jl                  # End-to-end Julia analysis pipeline entry point
+│   ├── spiral_time/
+│   │   ├── SpiralTime.jl                # ψ(t) embedding, ΔΦ(t) operator, regime classifier
+│   │   └── Project.toml                 # Julia package manifest
+│   ├── energy_transfer/
+│   │   ├── EnergyTransfer.jl            # Composite indicator I(t) and EUV derivative
+│   │   └── Project.toml
+│   ├── topology/
+│   │   ├── Topology.jl                  # Var_L[B](t), χ(t) memory variable
+│   │   └── Project.toml
+│   └── release_events/
+│       ├── ReleaseEvents.jl             # FlareEvent struct, lead-time statistics
+│       └── Project.toml
 │
-└── docs/                           # Documentation and educational material
-    ├── overview.md                 # High-level project overview
-    ├── how_to_navigate.md          # Guide to repo structure and workflow
-    ├── glossary.md                 # Definitions of scientific terms
-    └── diagrams/                   # Supporting diagrams and illustrations
-
+├── test/                                # Automated test suite
+│   ├── conftest.py                      # pytest configuration (sys.path setup)
+│   ├── test_math_utils.py               # Unit tests for shared/math_utils.py
+│   ├── test_data_loader.py              # Smoke tests for shared/data_loader.py (skip if offline)
+│   ├── test_plot_utils.py               # Smoke tests for shared/plot_utils.py
+│   ├── test_integration_pipeline.py     # End-to-end pipeline integration test (synthetic data)
+│   ├── runtests.jl                      # Julia master test runner
+│   ├── test_math_utils.jl               # Julia tests for MathUtils module
+│   ├── test_spiral_time.jl              # Julia tests for SpiralTime module
+│   ├── test_energy_transfer.jl          # Julia tests for EnergyTransfer module
+│   ├── test_topology.jl                 # Julia tests for Topology module
+│   └── test_release_events.jl           # Julia tests for ReleaseEvents module
+│
+├── output/                              # Generated figures (not committed to version control)
+│   ├── paper_figures/                   # Publication-ready PNGs from make_goes_figures.py
+│   │   ├── fig6_goes_xray_flux.png      #   Fig 6 — semilog GOES X-ray flux time series
+│   │   ├── fig7_windowed_variance.png   #   Fig 7 — rolling variance (L = 200)
+│   │   └── fig8_flare_event_overlay.png #   Fig 8 — flux with flare-onset markers
+│   └── synthetic_pipeline/              # Figures from synthetic_pipeline_numbers.py
+│       ├── xray_flux_flare_overlay.png
+│       ├── rolling_variance_x.png
+│       ├── delta_phi_regime_bands.png
+│       ├── psi_trajectory.png
+│       └── composite_indicator.png
+│
+└── docs/                                # Documentation and educational material
+    ├── overview.md                      # High-level project overview
+    ├── how_to_navigate.md               # Guide to repo structure and workflow
+    ├── glossary.md                      # Definitions of scientific and mathematical terms
+    └── diagrams/                        # Supporting diagrams and illustrations
 ```
 
 ---
@@ -276,7 +321,20 @@ Each domain has a matching folder under `tools/` for:
 
 ```bash
 pip install -r requirements.txt
-python domains/<domain>/examples_python/example_1.py
+
+# Full 10-step pipeline with real GOES data:
+python domains/spiral_time/examples_python/full_pipeline_demo.py
+
+# Publication-ready figures (Figs 6–8):
+python domains/spiral_time/examples_python/make_goes_figures.py
+
+# Synthetic data pipeline with numerical tables:
+python domains/spiral_time/examples_python/synthetic_pipeline_numbers.py
+
+# Other domain examples:
+python domains/energy_transfer/examples_python/composite_indicator_demo.py
+python domains/topology/examples_python/magnetometer_variance_demo.py
+python domains/release_events/examples_python/flare_overlay_demo.py
 ```
 
 ### Julia
