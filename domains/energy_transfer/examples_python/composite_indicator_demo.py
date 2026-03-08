@@ -38,6 +38,7 @@ _REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..",
 sys.path.insert(0, _REPO_ROOT)
 
 from shared.data_loader import load_xray_flux, load_magnetometer, load_euvs
+from shared.math_utils import rolling_variance, euv_derivative, normalize_01
 
 # ---------------------------------------------------------------------------
 # Configuration
@@ -47,33 +48,6 @@ W1 = W2 = W3 = 1 / 3  # equal weighting — placeholder (see PAPER.md Eq. (5))
 
 OUTPUT_DIR = os.path.join(os.path.dirname(__file__), "output")
 OUTPUT_FILE = os.path.join(OUTPUT_DIR, "composite_indicator_demo.png")
-
-
-# ---------------------------------------------------------------------------
-# Helper functions
-# ---------------------------------------------------------------------------
-
-def rolling_variance(series: np.ndarray, L: int) -> np.ndarray:
-    """Compute rolling variance Var_L[X](t) per PAPER.md Eq. (3)."""
-    result = np.full_like(series, np.nan)
-    for i in range(L - 1, len(series)):
-        window = series[i - L + 1: i + 1]
-        result[i] = np.mean((window - np.mean(window)) ** 2)
-    return result
-
-
-def euv_derivative(euv: np.ndarray) -> np.ndarray:
-    """|d/dt EUV(t)| via central finite differences, absolute value."""
-    deriv = np.gradient(euv)
-    return np.abs(deriv)
-
-
-def normalize_01(arr: np.ndarray) -> np.ndarray:
-    """Min-max normalize to [0, 1], ignoring NaNs."""
-    lo, hi = np.nanmin(arr), np.nanmax(arr)
-    if hi == lo:
-        return np.zeros_like(arr)
-    return (arr - lo) / (hi - lo)
 
 
 # ---------------------------------------------------------------------------

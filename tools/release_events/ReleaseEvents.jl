@@ -64,7 +64,20 @@ peak is found before the event.
 References: PAPER.md §9.3 — lead-time analysis.
 """
 function compute_lead_times(flare_times, indicator_peaks)
-    error("Not yet implemented")
+    lead_times = Vector{Float64}(undef, length(flare_times))
+    for (k, ft) in enumerate(flare_times)
+        best_lead = NaN
+        for (pt, _pv) in zip(indicator_peaks.times, indicator_peaks.values)
+            if pt < ft
+        lead = Float64(Dates.value(Dates.Millisecond(ft - pt)) / 1000.0)  # milliseconds → seconds
+                if isnan(best_lead) || lead < best_lead
+                    best_lead = lead
+                end
+            end
+        end
+        lead_times[k] = best_lead
+    end
+    return lead_times
 end
 
 """
@@ -89,7 +102,11 @@ NamedTuple with fields:
 References: PAPER.md §9.3, Figures 6–8.
 """
 function overlay_events(timeseries, flare_events)
-    error("Not yet implemented")
+    return (
+        series  = timeseries,
+        events  = flare_events,
+        classes = [e.class_type for e in flare_events],
+    )
 end
 
 end  # module ReleaseEvents
