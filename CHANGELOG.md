@@ -7,6 +7,38 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.3.0] — 2026-03-08
+
+### Added
+- New script: `domains/spiral_time/examples_python/make_goes_summary_report.py`  
+  A self-contained reporting tool that:
+  - loads real GOES 7‑day flux and flare data via `shared/data_loader.load_xray_flux` and `load_xray_flares`
+  - computes `rolling_variance(flux, L=200)` once via `shared/math_utils`
+  - produces three numeric CSV tables:
+    - `goes_table_a_flux.csv` — `time_utc, xray_flux`
+    - `goes_table_b_rolling_variance.csv` — `time_utc, rolling_variance, window_L`
+    - `goes_table_c_flare_overlay.csv` — `time_utc, xray_flux, flare_flag, flare_class`
+  - regenerates Figures 6–8 at 300 dpi using the existing plotting conventions
+  - assembles a multi-page PDF report (`goes_summary_report.pdf`) containing:
+    - a title page with GOES data source, observation window, and window length `L`
+    - one page per figure embedding the PNG and a sampled table (up to 30 rows, every N‑th row for large datasets)
+
+### Changed
+- Improved flare matching logic in Table C:  
+  Flux timestamps and flare onset times are rounded to the nearest minute before lookup, ensuring consistent alignment even when `begin_time` falls back to `time_max`.
+- Added `_is_valid_time()` helper to handle `NaT` correctly.  
+  Pandas converts missing datetimes to `NaT`, and `NaT is not None` evaluates `True`, which previously allowed invalid timestamps to reach `ax.axvline()`.  
+  All timestamp validation now uses `pd.isna()`.
+
+### Documentation
+- Updated README repository tree:
+  - added `make_goes_summary_report.py`
+  - added all new `output/paper_figures/` artifacts
+- Expanded the Spiral-Time domain section with a reference table covering all five scripts
+- Updated *Getting Started* to include the run command for the new reporting script
+
+---
+
 ## [1.2.0] — 2026-03-08
 
 ### Added
