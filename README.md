@@ -1,4 +1,4 @@
-# ☀️ Solarflare
+# ☀️ Solar Flare Detection
 
 Domain‑based solar physics repository combining Python examples with Julia models.  
 Uses real GOES X‑ray, EUV, and magnetometer data to explore flare behavior, energy release, magnetic topology, and instability dynamics through clear theory, visuals, and reproducible tools.
@@ -9,7 +9,7 @@ Uses real GOES X‑ray, EUV, and magnetometer data to explore flare behavior, en
 
 ## Overview
 
-Solarflare is an educational and computational framework for studying solar flare phenomena using real observational data. The repository separates **didactic Python examples** from **high‑performance Julia models**, allowing users to learn the concepts and then explore deeper numerical simulations.
+Solar Flare Detection is an educational and computational framework for studying solar flare phenomena using real observational data. The repository separates **didactic Python examples** from **high‑performance Julia models**, allowing users to learn the concepts and then explore deeper numerical simulations.
 
 Solar flares occur when magnetic energy stored in the corona is rapidly released through **magnetic reconnection** — converting stored magnetic free energy into plasma heating, electromagnetic radiation, and kinetic energy of accelerated particles. Major flares and associated coronal mass ejections (CMEs) can disrupt satellite operations, navigation systems, communication infrastructure, and in extreme cases even power grids.
 
