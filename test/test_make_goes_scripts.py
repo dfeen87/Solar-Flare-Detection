@@ -463,3 +463,68 @@ class TestMakeFig6GoesFlux:
             mf6._OUTPUT_DIR = original_dir
 
         assert os.path.isabs(path), "returned path must be absolute"
+
+    def test_make_fig7_creates_png(self, syn_times, syn_flux, tmp_path):
+        """make_fig7 must create a non-empty PNG file."""
+        original_dir = mf6._OUTPUT_DIR
+        mf6._OUTPUT_DIR = str(tmp_path)
+        try:
+            path = mf6.make_fig7(syn_times, syn_flux)
+        finally:
+            mf6._OUTPUT_DIR = original_dir
+
+        assert os.path.isfile(path), "fig7 PNG not created"
+        assert os.path.getsize(path) > 0, "fig7 PNG is empty"
+        assert path.endswith("fig7_windowed_variance.png")
+
+    def test_make_fig7_returns_absolute_path(self, syn_times, syn_flux, tmp_path):
+        """make_fig7 must return an absolute path."""
+        original_dir = mf6._OUTPUT_DIR
+        mf6._OUTPUT_DIR = str(tmp_path)
+        try:
+            path = mf6.make_fig7(syn_times, syn_flux)
+        finally:
+            mf6._OUTPUT_DIR = original_dir
+
+        assert os.path.isabs(path), "returned path must be absolute"
+
+    def test_make_fig8_creates_png(self, syn_times, syn_flux, syn_flare_data,
+                                   tmp_path):
+        """make_fig8 must create a non-empty PNG file."""
+        flare_times = [t for t, _ in syn_flare_data]
+
+        original_dir = mf6._OUTPUT_DIR
+        mf6._OUTPUT_DIR = str(tmp_path)
+        try:
+            path = mf6.make_fig8(syn_times, syn_flux, flare_times)
+        finally:
+            mf6._OUTPUT_DIR = original_dir
+
+        assert os.path.isfile(path), "fig8 PNG not created"
+        assert os.path.getsize(path) > 0, "fig8 PNG is empty"
+        assert path.endswith("fig8_flare_event_overlay.png")
+
+    def test_make_fig8_no_flares_no_error(self, syn_times, syn_flux, tmp_path):
+        """make_fig8 must succeed gracefully when the flare list is empty."""
+        original_dir = mf6._OUTPUT_DIR
+        mf6._OUTPUT_DIR = str(tmp_path)
+        try:
+            path = mf6.make_fig8(syn_times, syn_flux, [])
+        finally:
+            mf6._OUTPUT_DIR = original_dir
+
+        assert os.path.isfile(path)
+
+    def test_make_fig8_returns_absolute_path(self, syn_times, syn_flux,
+                                             syn_flare_data, tmp_path):
+        """make_fig8 must return an absolute path."""
+        flare_times = [t for t, _ in syn_flare_data]
+
+        original_dir = mf6._OUTPUT_DIR
+        mf6._OUTPUT_DIR = str(tmp_path)
+        try:
+            path = mf6.make_fig8(syn_times, syn_flux, flare_times)
+        finally:
+            mf6._OUTPUT_DIR = original_dir
+
+        assert os.path.isabs(path), "returned path must be absolute"
