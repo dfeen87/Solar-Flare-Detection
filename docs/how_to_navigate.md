@@ -11,7 +11,10 @@
 │
 ├── shared/                         # Shared Python utilities
 │   ├── __init__.py
-│   └── data_loader.py              # Loads all 5 GOES data files (local + NOAA fallback)
+│   ├── README.md                   # Documentation for shared modules
+│   ├── data_loader.py              # Loads all 5 GOES data files (local + NOAA fallback)
+│   ├── math_utils.py               # Core math functions (rolling_variance, ΔΦ, χ, …)
+│   └── plot_utils.py               # Shared visualization helpers (Figures 6–8)
 │
 ├── domains/                        # Domain logic and educational Python examples
 │   ├── spiral_time/                # ψ(t), ΔΦ(t), regime classification
@@ -36,6 +39,17 @@
 │   ├── energy_transfer/EnergyTransfer.jl
 │   ├── topology/Topology.jl
 │   └── release_events/ReleaseEvents.jl
+│
+├── test/                           # Python test suite
+│   ├── conftest.py                 # pytest configuration (sys.path setup)
+│   ├── test_math_utils.py          # Unit tests for shared/math_utils.py (43 tests)
+│   ├── test_data_loader.py         # Unit tests for shared/data_loader.py (13 tests)
+│   ├── test_plot_utils.py          # Smoke tests for shared/plot_utils.py
+│   ├── runtests.jl                 # Julia test runner
+│   ├── test_spiral_time.jl
+│   ├── test_topology.jl
+│   ├── test_energy_transfer.jl
+│   └── test_release_events.jl
 │
 ├── docs/                           # Documentation
 │   ├── overview.md                 # Project overview (this area)
@@ -112,3 +126,26 @@ assets/data/                                     (rolling variance,
 2. Add Python example(s) in `domains/<name>/examples_python/`.
 3. Create `tools/<name>/<Name>.jl` with Julia stubs and `Project.toml`.
 4. Update `docs/overview.md` to describe the new domain.
+
+---
+
+## Running Python Tests
+
+The `test/` directory contains a pytest suite that covers the shared utilities.
+
+```bash
+# Install dependencies (from repo root)
+pip install -r requirements.txt
+pip install pytest
+
+# Run all Python tests
+pytest test/
+
+# Run individual test modules
+pytest test/test_math_utils.py -v
+pytest test/test_data_loader.py -v
+pytest test/test_plot_utils.py -v
+```
+
+`test/conftest.py` adds the repository root to `sys.path` automatically so
+that `shared.*` imports work regardless of the working directory.
