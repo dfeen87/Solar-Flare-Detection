@@ -141,6 +141,16 @@ Implements the phase–memory embedding ψ(𝑡) = 𝑡 + 𝑖φ(𝑡) + 𝑗χ(
 
 **Key signals:** X-ray flux, phase-coherence proxies, memory coordinate χ(𝑡)
 
+**Scripts:**
+
+| Script | Purpose |
+|--------|---------|
+| `full_pipeline_demo.py` | Complete 10-step PAPER.md pipeline using real GOES data |
+| `make_goes_figures.py` | Generates publication-ready Figures 6–8 (PNG, 300 dpi) |
+| `make_goes_summary_report.py` | Exports Figures 6–8, three numeric CSV tables (flux, rolling variance, flare overlay), and a multi-page PDF summary report |
+| `synthetic_pipeline_numbers.py` | Runs the full pipeline on a synthetic dataset and prints numerical tables |
+| `variance_and_regime_demo.py` | Step-by-step walkthrough of ΔΦ(𝑡) and regime classification |
+
 ### ⚡ Energy Transfer (`domains/energy_transfer/`)
 
 Analyzes how flare energy distributes across wavelengths using X-ray and EUV irradiance datasets. Connects to the composite indicator 𝐼(𝑡) and the EUV derivative term |d/dt EUV(𝑡)|.
@@ -216,6 +226,7 @@ See `CITATIONS.md` for full data references.
 │   │   └── examples_python/
 │   │       ├── full_pipeline_demo.py    # Complete 10-step PAPER.md pipeline (real GOES data)
 │   │       ├── make_goes_figures.py     # Publication figures 6–8: flux, variance, flare overlay
+│   │       ├── make_goes_summary_report.py    # CSV tables + figures 6–8 + PDF summary report
 │   │       ├── synthetic_pipeline_numbers.py  # Synthetic 7-day dataset; prints numerical tables
 │   │       ├── variance_and_regime_demo.py    # ΔΦ(t) and regime classification walkthrough
 │   │       └── output/                  # Generated figures (git-ignored except .gitkeep)
@@ -267,10 +278,15 @@ See `CITATIONS.md` for full data references.
 │   └── test_release_events.jl           # Julia tests for ReleaseEvents module
 │
 ├── output/                              # Generated figures (not committed to version control)
-│   ├── paper_figures/                   # Publication-ready PNGs from make_goes_figures.py
+│   ├── paper_figures/                   # Publication-ready outputs from make_goes_figures.py
+│   │   │                                #   and make_goes_summary_report.py
 │   │   ├── fig6_goes_xray_flux.png      #   Fig 6 — semilog GOES X-ray flux time series
 │   │   ├── fig7_windowed_variance.png   #   Fig 7 — rolling variance (L = 200)
-│   │   └── fig8_flare_event_overlay.png #   Fig 8 — flux with flare-onset markers
+│   │   ├── fig8_flare_event_overlay.png #   Fig 8 — flux with flare-onset markers
+│   │   ├── goes_table_a_flux.csv        #   Table A — time_utc | xray_flux
+│   │   ├── goes_table_b_rolling_variance.csv  # Table B — time_utc | rolling_variance | window_L
+│   │   ├── goes_table_c_flare_overlay.csv     # Table C — time_utc | xray_flux | flare_flag | flare_class
+│   │   └── goes_summary_report.pdf      #   PDF report: title page + Fig 6–8 pages with tables
 │   └── synthetic_pipeline/              # Figures from synthetic_pipeline_numbers.py
 │       ├── xray_flux_flare_overlay.png
 │       ├── rolling_variance_x.png
@@ -327,6 +343,9 @@ python domains/spiral_time/examples_python/full_pipeline_demo.py
 
 # Publication-ready figures (Figs 6–8):
 python domains/spiral_time/examples_python/make_goes_figures.py
+
+# GOES 7-day summary: CSV tables + Figs 6–8 + PDF report:
+python domains/spiral_time/examples_python/make_goes_summary_report.py
 
 # Synthetic data pipeline with numerical tables:
 python domains/spiral_time/examples_python/synthetic_pipeline_numbers.py
