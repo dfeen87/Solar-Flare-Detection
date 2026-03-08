@@ -21,6 +21,9 @@ domains/*/examples_python/output/*.png
 domains/*/examples_python/output/*.pdf
 domains/*/examples_python/output/*.svg
 
+# Top-level pipeline output
+output/
+
 # macOS
 .DS_Store
 
