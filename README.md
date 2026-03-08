@@ -203,6 +203,7 @@ See `CITATIONS.md` for full data references.
 │   ├── data_loader.py              # GOES/EUVS data loading helpers
 │   ├── plot_utils.py               # Plotting utilities
 │   ├── DataLoader.jl               # Julia data-loading helper
+│   ├── MathUtils.jl                # Julia shared math utilities (normalize_01, rolling_correlation)
 │   └── README.md                   # Shared layer documentation
 │
 ├── domains/                        # Domain logic and educational examples
@@ -212,6 +213,7 @@ See `CITATIONS.md` for full data references.
 │   └── release_events/             # Flare event overlays, lead-time analysis
 │
 ├── tools/                          # High-performance Julia modules
+│   ├── run_pipeline.jl             # End-to-end Julia analysis pipeline
 │   ├── spiral_time/                # Julia models for spiral-time dynamics
 │   ├── energy_transfer/            # Julia models for energy distribution
 │   ├── topology/                   # Julia models for magnetic topology
@@ -224,6 +226,7 @@ See `CITATIONS.md` for full data references.
 │   ├── test_plot_utils.py          # Smoke tests for shared/plot_utils.py
 │   ├── test_integration_pipeline.py # End-to-end pipeline integration test
 │   ├── runtests.jl                 # Julia master test runner
+│   ├── test_math_utils.jl          # Julia tests for MathUtils module
 │   ├── test_spiral_time.jl         # Julia tests for SpiralTime module
 │   ├── test_energy_transfer.jl     # Julia tests for EnergyTransfer module
 │   ├── test_topology.jl            # Julia tests for Topology module
@@ -279,6 +282,10 @@ python domains/<domain>/examples_python/example_1.py
 ### Julia
 
 ```bash
+# Run the end-to-end analysis pipeline:
+julia tools/run_pipeline.jl
+
+# Or work with an individual domain module:
 cd tools/<domain>
 julia --project
 ```

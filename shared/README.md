@@ -95,16 +95,46 @@ fig.savefig("output.png", dpi=150, bbox_inches="tight")
 
 ---
 
-## Julia Module
+## Julia Modules
 
 ### `DataLoader.jl`
 
-High-performance Julia counterpart to `data_loader.py`.  Provides typed structs and documented function stubs for loading GOES data products.  Full implementations are deferred to a future PR.
+High-performance Julia counterpart to `data_loader.py`.  Provides typed, fully implemented functions for loading GOES data products from the NOAA SWPC JSON feeds (with local file-cache support).
+
+| Function | Returns | GOES product |
+|---|---|---|
+| `load_xray_flux()` | NamedTuple `(times, flux)` | X-ray irradiance (1-min) |
+| `load_xray_flares()` | NamedTuple `(time_begin, time_max, time_end, class_type, class_num)` | Flare event catalogue |
+| `load_magnetometer()` | NamedTuple `(times, He)` | He-component magnetometer |
+| `load_euvs()` | NamedTuple `(times, channels)` | EUV irradiance (multi-channel) |
+
+**Import example**
 
 ```julia
-# From tools/<domain>/, in the Julia REPL:
-using DataLoader
-df = load_xray_flux()   # Returns a DataFrame
+include("shared/DataLoader.jl")
+using .DataLoader
+xray   = load_xray_flux()
+flares = load_xray_flares()
+```
+
+---
+
+### `MathUtils.jl`
+
+Shared Julia mathematical utilities mirroring the pipeline-relevant parts of `math_utils.py`.  All functions accept and return `Vector{Float64}` and handle NaN values gracefully.
+
+| Function | PAPER.md Reference | Description |
+|---|---|---|
+| `normalize_01(x)` | Eq. (5), Eq. (6) | Min-max normalization to [0, 1]; preserves NaN positions |
+| `rolling_correlation(x, y, L)` | §6.2 | Rolling Pearson correlation C(t) over window of length L |
+
+**Import example**
+
+```julia
+include("shared/MathUtils.jl")
+using .MathUtils
+x_norm = normalize_01(x)
+C      = rolling_correlation(flux, euv, 30)
 ```
 
 ---

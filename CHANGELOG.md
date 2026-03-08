@@ -7,6 +7,36 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [Unreleased]
+
+### Added
+
+- **PR #7 — Shared Julia math utilities, end-to-end pipeline, and Julia tests**
+  - `shared/MathUtils.jl` — new Julia module with `normalize_01` and
+    `rolling_correlation`, mirroring the pipeline-relevant parts of
+    `shared/math_utils.py`. Both functions include docstrings referencing
+    PAPER.md sections.
+  - `tools/run_pipeline.jl` — end-to-end Julia pipeline script wiring all five
+    Julia modules (`DataLoader`, `EnergyTransfer`, `Topology`, `SpiralTime`,
+    `ReleaseEvents`) together. Covers data loading, rolling variances, composite
+    indicator I(t), ΔΦ(t) regime classification, phase–memory embedding ψ(t),
+    and lead-time analysis. Runnable with `julia tools/run_pipeline.jl`.
+  - `test/test_math_utils.jl` — Julia unit tests for `MathUtils` covering
+    `normalize_01` (basic normalization, constant input, all-NaN, mixed NaN)
+    and `rolling_correlation` (perfect positive/negative correlation, constant
+    signals, window larger than data, output length).
+  - Updated `test/runtests.jl` to include `test_math_utils.jl`.
+
+### Changed
+
+- `shared/README.md` — removed inaccurate "function stubs" / "deferred to a
+  future PR" language from the `DataLoader.jl` section; replaced with an
+  accurate description of the fully implemented module including a function
+  table. Added a new `MathUtils.jl` section with a function table and import
+  example.
+
+---
+
 ## [1.0.0] - 2026-03-08
 
 ### Added
