@@ -7,6 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.4.0] — 2026-03-08
+
+### Added
+- Committed all 7 publication-ready output files to the repository under
+  `output/paper_figures/`:
+  - `fig6_goes_xray_flux.png` — Fig 6: semilog GOES X-ray flux time series
+  - `fig7_windowed_variance.png` — Fig 7: rolling variance (L=200)
+  - `fig8_flare_event_overlay.png` — Fig 8: flux with flare-onset markers
+  - `goes_table_a_flux.csv` — Table A: time_utc | xray_flux
+  - `goes_table_b_rolling_variance.csv` — Table B: time_utc | rolling_variance | window_L
+  - `goes_table_c_flare_overlay.csv` — Table C: time_utc | xray_flux | flare_flag | flare_class
+  - `goes_summary_report.pdf` — PDF report: title page + Fig 6–8 pages with tables
+
+### Changed
+- Updated `.gitignore` to track all files inside `output/paper_figures/`
+  (`!output/paper_figures/**`) while keeping `output/synthetic_pipeline/`
+  gitignored as before.
+- Updated README to reflect that `output/paper_figures/` outputs are now
+  committed to version control.
+
+---
+
 ## [1.3.0] — 2026-03-08
 
 ### Added
