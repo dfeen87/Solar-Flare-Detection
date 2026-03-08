@@ -18,7 +18,7 @@ Solar Flare Detection is an educational and computational framework for studying
 
 Solar flares occur when magnetic energy stored in the corona is rapidly released through **magnetic reconnection** — converting stored magnetic free energy into plasma heating, electromagnetic radiation, and kinetic energy of accelerated particles. Major flares and associated coronal mass ejections (CMEs) can disrupt satellite operations, navigation systems, communication infrastructure, and in extreme cases even power grids.
 
-All datasets are sourced from GOES and EUVS instruments and stored under `assets/data/`.
+All datasets are sourced from GOES and EUVS instruments and fetched at runtime from the NOAA SWPC API via `shared/data_loader.py`.
 
 ---
 
@@ -163,15 +163,15 @@ Examines flare initiation, peak flux, decay, and classification using GOES flare
 
 ## Data Sources
 
-All observational data is stored under `assets/data/` and sourced from the [NOAA Space Weather Prediction Center (SWPC)](https://services.swpc.noaa.gov/json/).
+All observational data is fetched at runtime from the [NOAA Space Weather Prediction Center (SWPC)](https://services.swpc.noaa.gov/json/) via `shared/data_loader.py`.
 
-| Directory | File | Observable | Physical Meaning |
-|-----------|------|------------|------------------|
-| `xray/` | `xrays-7-day.json` | 𝑋(𝑡) | Coronal radiative output / flare intensity proxy |
-| `xray/` | `xray-flares-7-day.json` | {𝑡ₖ} | Event timestamps and classes (A, B, C, M, X) |
-| `xray/` | `xray-background-7-day.json` | 𝑋_bg(𝑡) | Quiet-Sun baseline emission |
-| `magnetometers/` | `magnetometers-7-day.json` | 𝐵(𝑡) | Field perturbation surrogate |
-| `euvs/` | `euvs-7-day.json` | EUV(𝑡) | Coronal heating proxy |
+| File | Observable | Physical Meaning |
+|------|------------|------------------|
+| `xrays-7-day.json` | 𝑋(𝑡) | Coronal radiative output / flare intensity proxy |
+| `xray-flares-7-day.json` | {𝑡ₖ} | Event timestamps and classes (A, B, C, M, X) |
+| `xray-background-7-day.json` | 𝑋_bg(𝑡) | Quiet-Sun baseline emission |
+| `magnetometers-7-day.json` | 𝐵(𝑡) | Field perturbation surrogate |
+| `euvs-7-day.json` | EUV(𝑡) | Coronal heating proxy |
 
 All data covers a **7-day rolling window** at native GOES cadence. The analysis pipeline is designed to generalize directly to multi-month or multi-year archives for full ROC/AUC statistical validation.
 
@@ -233,20 +233,6 @@ See `CITATIONS.md` for full data references.
 │   ├── how_to_navigate.md          # Guide to repo structure and workflow
 │   ├── glossary.md                 # Definitions of scientific terms
 │   └── diagrams/                   # Supporting diagrams and illustrations
-│
-└── assets/                         # Static assets and scientific datasets
-    ├── data/                       # Raw observational data (GOES, EUVS)
-    │   ├── xray/                   # X-ray background and flare data
-    │   │   ├── xray-background-7-day.json   # Quiet-Sun background levels
-    │   │   ├── xray-flares-7-day.json       # Flare event metadata
-    │   │   └── xrays-7-day.json             # Full-resolution X-ray flux
-    │   ├── magnetometers/                   # Magnetic field measurements
-    │   │   └── magnetometers-7-day.json     # GOES magnetometer data
-    │   └── euvs/                            # EUV irradiance data
-    │       └── euvs-7-day.json              # EUVS spectral irradiance
-    ├── diagrams/                   # Visuals used in documentation
-    ├── figures/                    # Figures for papers or examples
-    └── icons/                      # Icons and small graphical assets
 
 ```
 
@@ -317,7 +303,7 @@ Full glossary available in `docs/glossary.md`.
 
 ## Contributing
 
-Pull requests are welcome. Please follow the domain structure, keep documentation clear, and ensure reproducibility. New domains should include both a Python educational layer and a Julia computational module, with data sourced from `assets/data/`.
+Pull requests are welcome. Please follow the domain structure, keep documentation clear, and ensure reproducibility. New domains should include both a Python educational layer and a Julia computational module, with data fetched via `shared/data_loader.py`.
 
 ---
 
