@@ -6,7 +6,7 @@ Implements:
   - composite_indicator:   I(t) = w₁ Var_L[X] + w₂ Var_L[B] + w₃ |d/dt EUV|  (Eq. 5)
   - euv_derivative:        |d/dt EUV(t)| via finite differences
 
-All function bodies are stubs pending full implementation.
+All functions are fully implemented.
 """
 module EnergyTransfer
 

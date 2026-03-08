@@ -169,6 +169,86 @@ def classify_regime(delta_phi_norm: float) -> str:
     return "Collapse"
 
 
+def compute_delta_phi(
+    S: np.ndarray,
+    I: np.ndarray,
+    C: np.ndarray,
+    alpha: float = 1 / 3,
+    beta: float = 1 / 3,
+    gamma: float = 1 / 3,
+) -> np.ndarray:
+    """Triadic instability operator ΔΦ(t) — PAPER.md Eq. (6).
+
+        ΔΦ(t) = α |ΔS(t)| + β |ΔI(t)| + γ |ΔC(t)|
+
+    First differences are computed via ``np.diff`` with ``prepend=np.nan`` so
+    the output has the same length as the inputs and the first element is
+    ``NaN``.
+
+    Parameters
+    ----------
+    S : np.ndarray
+        Structural variability S(t) (e.g. ``rolling_variance(B, L)``).
+    I : np.ndarray
+        Informational complexity I(t) (e.g. ``rolling_variance(X, L)``).
+    C : np.ndarray
+        Cross-channel coherence C(t) (e.g. ``rolling_correlation(X, EUV, L)``).
+    alpha, beta, gamma : float
+        Weighting coefficients; default 1/3 each (equal weighting).
+
+    Returns
+    -------
+    np.ndarray
+        ΔΦ(t) values, same length as inputs. First element is ``NaN``.
+
+    References
+    ----------
+    PAPER.md Eq. (6).
+    """
+    dS = np.abs(np.diff(S, prepend=np.nan))
+    dI = np.abs(np.diff(I, prepend=np.nan))
+    dC = np.abs(np.diff(C, prepend=np.nan))
+    return alpha * dS + beta * dI + gamma * dC
+
+
+def compute_composite_indicator(
+    var_x_norm: np.ndarray,
+    var_b_norm: np.ndarray,
+    d_euv_norm: np.ndarray,
+    w1: float = 1 / 3,
+    w2: float = 1 / 3,
+    w3: float = 1 / 3,
+) -> np.ndarray:
+    """Composite instability indicator I(t) — PAPER.md Eq. (5).
+
+        I(t) = w₁ Var_L[X](t) + w₂ Var_L[B](t) + w₃ |d/dt EUV(t)|
+
+    All three input components must already be normalized to [0, 1] so that
+    equal weights are physically meaningful.
+
+    Parameters
+    ----------
+    var_x_norm : np.ndarray
+        Rolling variance of X-ray flux, normalized to [0, 1].
+    var_b_norm : np.ndarray
+        Rolling variance of magnetometer B(t), normalized to [0, 1].
+    d_euv_norm : np.ndarray
+        Absolute EUV time-derivative, normalized to [0, 1].
+    w1, w2, w3 : float
+        Weighting coefficients; default 1/3 each (equal weighting).
+
+    Returns
+    -------
+    np.ndarray
+        Composite indicator I(t) values, same length as inputs.
+
+    References
+    ----------
+    PAPER.md Eq. (5).
+    """
+    return w1 * var_x_norm + w2 * var_b_norm + w3 * d_euv_norm
+
+
 def compute_chi(var_b: np.ndarray, window_L: int) -> np.ndarray:
     """Compute memory variable χ(t) as cumulative integral of Var_L[B](t).
 
