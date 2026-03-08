@@ -21,14 +21,12 @@ domains/*/examples_python/output/*.png
 domains/*/examples_python/output/*.pdf
 domains/*/examples_python/output/*.svg
 
-# Top-level pipeline output — generated files are not committed to version
-# control, but directory-marker .gitkeep files are tracked so that
-# output/paper_figures/ and output/synthetic_pipeline/ exist after a fresh
-# clone and the generation scripts can write their outputs without needing to
-# create the directories themselves.
+# Top-level pipeline output — synthetic pipeline outputs are not committed,
+# but paper_figures/ artifacts are tracked so that publication-ready figures,
+# CSV tables, and the PDF report are available directly from the repository.
 output/**
 !output/paper_figures/
-!output/paper_figures/.gitkeep
+!output/paper_figures/**
 !output/synthetic_pipeline/
 !output/synthetic_pipeline/.gitkeep
 

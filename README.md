@@ -277,8 +277,8 @@ See `CITATIONS.md` for full data references.
 │   ├── test_topology.jl                 # Julia tests for Topology module
 │   └── test_release_events.jl           # Julia tests for ReleaseEvents module
 │
-├── output/                              # Generated figures (not committed to version control)
-│   ├── paper_figures/                   # Publication-ready outputs from make_goes_figures.py
+├── output/                              # Generated figures
+│   ├── paper_figures/                   # Publication-ready outputs (committed to repo)
 │   │   │                                #   and make_goes_summary_report.py
 │   │   ├── fig6_goes_xray_flux.png      #   Fig 6 — semilog GOES X-ray flux time series
 │   │   ├── fig7_windowed_variance.png   #   Fig 7 — rolling variance (L = 200)
