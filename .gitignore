@@ -1,0 +1,28 @@
+# Downloaded data files — fetched at runtime from NOAA SWPC
+assets/data/**/*.json
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+.eggs/
+.env
+.venv
+venv/
+env/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Generated figures and outputs
+domains/*/examples_python/output/*.png
+domains/*/examples_python/output/*.pdf
+domains/*/examples_python/output/*.svg
+
+# macOS
+.DS_Store
+
+# Julia
+Manifest.toml
