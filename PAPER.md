@@ -1,7 +1,7 @@
 # Detection of Solar Plasma Instabilities Using Multi-Channel GOES Observations:
 ## Toward Early Solar Flare Forecasting
 
-Marcel Krüger**¹ and Don Michael Feeney Jr.²†
+Marcel Krüger¹ and Don Michael Feeney Jr.²†
 
 ¹ Independent Researcher, Germany
 ² Independent Researcher, USA
@@ -13,25 +13,79 @@ Marcel Krüger**¹ and Don Michael Feeney Jr.²†
 
 ## Abstract
 
-Solar flares are explosive releases of magnetic energy in the solar corona that can significantly affect space weather conditions near Earth. Reliable detection of early flare precursors remains an important challenge for operational forecasting.
+Solar flares are explosive releases of magnetic energy in the solar corona that can strongly influence the near-Earth space environment. Reliable identification of early flare precursors remains a central challenge for space weather forecasting.
 
-We investigate whether statistical signatures in multi-channel GOES observations provide early indicators of flare activity. We consider soft X-ray flux, a flare event catalogue, and complementary channels (e.g. magnetometer proxies when available). We quantify pre-event variability via windowed variance and propose a composite instability indicator that integrates X-ray variability and magnetic perturbation surrogates.
+In this work we investigate whether statistical signatures in multi-channel GOES observations provide detectable early indicators of solar flare activity. We analyze soft X-ray flux measurements together with flare event catalogues and complementary observational channels when available.
 
-In addition, we outline an operator-based, non-equilibrium interpretation in which precursor build-up corresponds to a structured increase of temporal memory and phase-like degrees of freedom in the observed signals. If confirmed over larger samples, such signatures could improve warning lead times for satellite operators and critical infrastructure affected by severe space weather.
+Pre-event variability is quantified using windowed variance measures and related fluctuation statistics. Based on these quantities we introduce a composite instability indicator that combines X-ray variability with surrogate measures of magnetic perturbations.
 
-**Keywords:** solar flares; magnetic reconnection; space weather forecasting; GOES X-ray flux; instability detection
+Within this framework, the pre-flare phase can be interpreted as a non-equilibrium build-up process in which temporal correlations and phase-like degrees of freedom increase prior to the eruptive release of magnetic energy.
+
+If confirmed across larger observational samples, the proposed instability indicator could improve early-warning capabilities for satellite operators and technological infrastructure affected by severe space weather events.
+
+**Keywords:** solar flares; space weather; GOES X-ray observations; magnetic reconnection; flare precursors; instability indicators
 
 ---
 
 ## 1 Introduction
 
-Solar flares occur when magnetic energy stored in the corona is rapidly released through magnetic reconnection, producing bursts of radiation and energetic particle acceleration. Major flares and associated coronal mass ejections can disrupt satellite operations, navigation, communication infrastructure, and in extreme cases even power grids.
+Solar flares are among the most energetic phenomena in the solar atmosphere. They occur when magnetic energy stored in the solar corona is rapidly released through magnetic reconnection, producing bursts of electromagnetic radiation, energetic particle acceleration, and large-scale plasma restructuring.
 
-Despite continuous monitoring, predicting the onset time of flares remains difficult. A plausible route is to treat the pre-flare corona as a driven, non-equilibrium plasma system that approaches an instability threshold. In such systems, increased fluctuations and variance growth can precede transitions. This paper operationalizes that idea using GOES time-series and an event overlay analysis suitable for later scaling to longer archives.
+Major flare events and associated coronal mass ejections can strongly influence near-Earth space weather conditions, potentially disrupting satellite operations, navigation systems, communication infrastructure, and in extreme cases even terrestrial power grids. Understanding the physical mechanisms leading to flare initiation is therefore an important objective in solar and space physics.
+
+Despite continuous monitoring of the Sun by space-based observatories, reliable prediction of the exact onset time of solar flares remains a significant challenge. Many flare models suggest that the coronal magnetic field evolves gradually toward an instability threshold, after which rapid energy release occurs.
+
+From a dynamical systems perspective, such transitions may be preceded by statistical signatures such as enhanced fluctuations, variance growth, or changes in temporal correlations of observable signals. Detecting these signatures in solar monitoring data could therefore provide useful early indicators of flare activity.
+
+In this work we investigate whether statistical features in GOES soft X-ray time series exhibit measurable precursor behaviour prior to documented flare events. We analyze variability measures computed over sliding time windows and construct a composite instability indicator combining X-ray fluctuations with surrogate measures of magnetic activity.
+
+This framework allows solar flare initiation to be interpreted as a transition in a driven, non-equilibrium plasma system whose approach to instability may be detectable through statistical signatures in observational time series.
+
+The proposed methodology is designed to be compatible with large observational archives, enabling future extensions toward long-term statistical studies and operational space-weather forecasting applications.
 
 ---
 
-## 2 Solar Physics Background
+## 2 Data and Observations
+
+The analysis is based on publicly available solar monitoring data provided by the Geostationary Operational Environmental Satellites (GOES) program operated by the National Oceanic and Atmospheric Administration (NOAA).
+
+GOES satellites continuously monitor the solar soft X-ray flux in two wavelength channels: 0.5–4 Å and 1–8 Å. These measurements are widely used for operational solar flare detection and classification.
+
+For the present study we consider time series of the 1–8 Å soft X-ray flux, which serves as the primary indicator of solar flare activity. Flare event times and classifications are obtained from the NOAA solar flare catalogue, which provides standardized records of flare start time, peak time, duration, and intensity class (C, M, and X-class events).
+
+The analysis focuses on time windows preceding documented flare events in order to identify statistical signatures that may act as early precursors of eruptive activity.
+
+When available, auxiliary observational channels such as magnetic field variability proxies or geomagnetic perturbation indicators are also considered in order to assess potential correlations between magnetic activity and X-ray flux variability.
+
+All datasets used in this work are publicly accessible through the NOAA Space Weather Prediction Center and related data repositories.
+
+---
+
+## 3 Statistical Detection Method
+
+To investigate potential flare precursors, we analyze the temporal variability of the GOES soft X-ray flux prior to documented flare events.
+
+Let F(t) denote the observed X-ray flux time series. For a given time window of length T, the local variability of the signal is quantified using a windowed variance
+
+$$\sigma^2_T(t) = \frac{1}{T} \sum_{i=1}^{T} \left( F(t_i) - \bar{F}_T \right)^2$$
+
+where $\bar{F}_T$ denotes the mean flux within the window.
+
+Enhanced fluctuations in σ²_T(t) may indicate increased dynamical activity in the solar corona preceding flare onset.
+
+To capture combined signatures of pre-flare dynamics we define a composite instability indicator
+
+$$I(t) = \alpha\,\sigma^2_T(t) + \beta\,M(t)$$
+
+where M(t) represents a surrogate measure of magnetic perturbations or related activity indicators, and α, β are weighting coefficients.
+
+The temporal evolution of I(t) is analyzed in the time interval preceding flare events in order to assess whether systematic instability growth occurs prior to the eruptive phase.
+
+If such signatures are statistically robust across multiple events, the instability indicator may serve as a potential early-warning metric for solar flare forecasting.
+
+---
+
+## 4 Solar Physics Background
 
 Magnetic activity in the solar atmosphere originates from magnetic fields generated by convective plasma motions inside the Sun. These magnetic fields emerge through the photosphere and form complex structures in the solar corona where substantial magnetic free energy can accumulate. Under appropriate conditions, oppositely directed magnetic field lines can reconnect, converting stored magnetic energy into plasma heating, electromagnetic radiation, and kinetic energy of accelerated particles.
 
@@ -67,7 +121,7 @@ which is consistent with models of self-organized criticality in magnetized plas
 
 ---
 
-## 3 Solar Interior Structure
+## 5 Solar Interior Structure
 
 The internal structure of the Sun provides the physical environment in which magnetic fields are generated and transported toward the solar surface. Energy produced by nuclear fusion in the solar core is transported outward through two distinct layers: the radiative zone and the outer convective envelope.
 
@@ -102,11 +156,11 @@ Convective flows twist and stretch magnetic field lines, producing magnetic flux
 
 ---
 
-## 4 Observational Data and Channels
+## 6 Observational Data and Channels
 
 We focus on a seven-day observation window derived from GOES products. The analysis is written such that it generalizes directly to longer time spans (months/years) once the data ingestion pipeline is fixed.
 
-### 4.1 Data Sources
+### 6.1 Data Sources
 
 Solar X-ray flux and flare event data were obtained from the NOAA Space Weather Prediction Center (SWPC) real-time data services [3]. The dataset includes the 7-day GOES (Geostationary Operational Environmental Satellite) X-ray flux time series and associated flare event lists provided through the public JSON data feeds.
 
@@ -127,7 +181,7 @@ The repository contains scripts for automated retrieval of the NOAA GOES JSON fe
 
 ---
 
-## 5 Time-Series Construction
+## 7 Time-Series Construction
 
 We represent the observables as synchronized time series
 
@@ -135,7 +189,7 @@ $$X(t),\quad B(t),\quad \text{EUV}(t),$$
 
 sampled at the native cadence of the GOES product. In the minimal configuration used here, the core signal is the soft X-ray flux X(t) together with flare timestamps {tₖ}.
 
-### 5.1 Reproducible Analysis Pipeline
+### 7.1 Reproducible Analysis Pipeline
 
 The complete analysis workflow used in this study is implemented in a reproducible Python-based pipeline. The repository contains data ingestion scripts for NOAA GOES JSON feeds, preprocessing routines, and visualization modules used to generate the figures presented in this work.
 
@@ -143,11 +197,11 @@ The full pipeline is publicly available at: [https://github.com/dfeen87/Solar-Fl
 
 ---
 
-## 6 Instability Metrics and Triadic Operator Extension
+## 8 Instability Metrics and Triadic Operator Extension
 
 Solar flare initiation is a strongly nonlinear plasma instability that develops over extended temporal intervals. Consequently, precursor signatures may emerge not only in the amplitude of observables but also in their structural variability, informational complexity, and cross-channel synchronization.
 
-### 6.1 Variance-Based Instability Baseline
+### 8.1 Variance-Based Instability Baseline
 
 As a baseline diagnostic we compute the rolling variance of the soft X-ray flux X(t) over a sliding window of length L:
 
@@ -165,7 +219,7 @@ $$I(t) = w_1\,\text{Var}_L[X](t) + w_2\,\text{Var}_L[B](t) + w_3\left|\frac{d}{d
 
 where the weights w₁, w₂, w₃ are calibrated using historical flare catalogues.
 
-### 6.2 Triadic Instability Operator
+### 8.2 Triadic Instability Operator
 
 While variance captures amplitude fluctuations, flare initiation is fundamentally a multi-channel instability process involving magnetic topology, radiative complexity, and plasma coupling. Motivated by cross-domain instability analysis in complex dynamical systems, we introduce a triadic instability functional
 
@@ -179,7 +233,7 @@ where
 
 The coefficients α, β, γ determine the relative contribution of the structural, informational, and coherence components.
 
-### 6.3 Memory Effects and Non-Markovian Dynamics
+### 8.3 Memory Effects and Non-Markovian Dynamics
 
 Solar active regions exhibit strong hysteresis: magnetic energy can accumulate for hours or days before reconnection releases it in a flare event. This implies that the underlying dynamical process is intrinsically non-Markovian.
 
@@ -187,7 +241,7 @@ Within the present framework, this memory component can be represented by a slow
 
 This memory component provides a physical mechanism through which precursor signatures can appear prior to the flare itself.
 
-### 6.4 Regime Classification
+### 8.4 Regime Classification
 
 Using the instability functional ΔΦ(t), the solar activity state can be classified into four dynamical regimes:
 
@@ -225,7 +279,7 @@ Figure 3 provides a conceptual visualization of the proposed triadic regime stru
 
 **Figure 3:** Conceptual schematic of solar activity evolution in the triadic instability space (S, I, C). The trajectory illustrates the transition from a stable isostatic regime through progressive stress accumulation toward a critical threshold at ΔΦ ≈ 0.40, associated with flare onset and rapid magnetic energy release. The figure is schematic and intended only as an interpretive aid.
 
-### 6.5 Falsification Test
+### 8.5 Falsification Test
 
 A key prediction of the framework is that precursor detection relies on the system's temporal memory. If the historical information of the time series is artificially removed (e.g. by window randomization or temporal shuffling), the predictive power of ΔΦ should degrade significantly.
 
@@ -235,9 +289,9 @@ More generally, the present framework implies a non-Markovian consistency condit
 
 ---
 
-## 7 Operator-Based Non-Equilibrium Interpretation (Spiral-Time Support)
+## 9 Operator-Based Non-Equilibrium Interpretation (Spiral-Time Support)
 
-The instability indicators introduced above can also be interpreted within a structured non-equilibrium phase–memory framework. While the forecasting rule itself relies on measurable statistical indicators (Eqs. (3)–(5)), it is useful to provide a conceptual dynamical interpretation of the precursor behaviour.
+The instability indicators introduced above can also be interpreted within a structured non-equilibrium phase–memory framework. While the forecasting rule itself relies on measurable statistical indicators (Eqs. (5)–(7)), it is useful to provide a conceptual dynamical interpretation of the precursor behaviour.
 
 In this perspective the observed solar activity signal is treated as an effective non-equilibrium trajectory with memory. A convenient abstraction is to embed the time series into a structured phase–memory coordinate system
 
@@ -247,11 +301,11 @@ where t represents chronological time, φ(t) denotes a phase-like coherence coor
 
 Within this representation, the approach to a flare corresponds to a regime in which memory-driven amplification and cross-channel coherence lead to enhanced variability and accelerated regime transitions.
 
-Operationally, this behaviour is captured by the variance-based instability metric (Eq. (3)) and by the triadic instability operator ΔΦ(t) introduced above, while the phase–memory representation serves as a conceptual dynamical interpretation of these precursor signatures.
+Operationally, this behaviour is captured by the variance-based instability metric (Eq. (5)) and by the triadic instability operator ΔΦ(t) introduced above, while the phase–memory representation serves as a conceptual dynamical interpretation of these precursor signatures.
 
 ---
 
-## 8 Schematic Eruption and Loop Instability
+## 10 Schematic Eruption and Loop Instability
 
 The emergence and interaction of magnetic flux at the solar surface can lead to the formation of stressed coronal loop systems. As magnetic energy accumulates in these structures, the configuration may approach a critical stability threshold. Once this threshold is exceeded, magnetic reconnection can rapidly release the stored energy and drive eruptive plasma outflows into the heliosphere.
 
@@ -308,14 +362,14 @@ As illustrated in Figure 5, increasing magnetic stress in coronal loops can push
 
 ---
 
-## 9 Results
+## 11 Results
 
 The figures presented in this section illustrate the analysis workflow using a representative observation window and serve as a proof-of-concept demonstration of the proposed methodology. The pipeline is designed to operate directly on GOES time-series data obtained from the NOAA satellite archive and can be applied to extended datasets for large-scale statistical validation in future studies.
 
 The complete reproducible analysis pipeline used to retrieve the data, construct the time series, and generate the figures is available in the public repository:
 [https://github.com/dfeen87/Solar-Flare-Detection](https://github.com/dfeen87/Solar-Flare-Detection)
 
-### 9.1 X-ray Flux Time Series
+### 11.1 X-ray Flux Time Series
 
 Figure 6 shows the GOES soft X-ray flux time series for the 0.1–0.8 nm channel during the analyzed observation interval. The X-ray flux provides the primary observable for identifying flare-associated radiative activity in the solar corona.
 
@@ -342,7 +396,7 @@ Quiet intervals define the baseline emission level of the corona, whereas transi
 
 **Figure 6:** GOES soft X-ray flux time series for the 0.1–0.8 nm channel. The plot shows the temporal evolution of coronal radiative output during the analyzed observation window. Quiet intervals define the baseline emission level of the corona, while transient flux enhancements correspond to flare-associated energy release events.
 
-### 9.2 Windowed Variance as a Precursor Proxy
+### 11.2 Windowed Variance as a Precursor Proxy
 
 To quantify short-timescale fluctuations in the X-ray signal, we compute the rolling variance
 
@@ -379,7 +433,7 @@ Figure 7 shows the rolling variance Var_L[X](t) of the GOES soft X-ray flux comp
 
 **Figure 7:** Rolling variance of the GOES soft X-ray flux Var_L[X](t) computed using a sliding window L = 200. Variance growth reflects increasing short-timescale fluctuations in the coronal radiative output and may signal the system's approach to a critical instability threshold.
 
-### 9.3 Flare Event Overlay Plot (X-ray Flux with Event Markers)
+### 11.3 Flare Event Overlay Plot (X-ray Flux with Event Markers)
 
 A central diagnostic of the present framework is the explicit overlay of the X-ray flux time series with flare-event timestamps from the NOAA flare catalogue. This visualization is commonly used in space-weather analysis because it directly reveals whether candidate precursor signatures occur prior to documented flare onset.
 
@@ -414,7 +468,7 @@ Building on these observations, the following section discusses a conservative i
 
 ---
 
-## 10 Discussion
+## 12 Discussion
 
 The proposed framework is intentionally conservative: it relies on standard rolling statistics and explicit event overlays to evaluate whether variance growth in solar observables can act as a reliable precursor to flare activity. The operator-based spiral-time interpretation is used only as a structured lens to interpret the observed dynamics, without modifying the underlying forecasting rule.
 
@@ -430,7 +484,7 @@ Importantly, the instability functional ΔΦ(t) introduced in this work does not
 
 Future work will therefore focus on large-scale validation across extended GOES archives, including statistical evaluation of lead times, false-alarm rates, and predictive skill relative to existing space-weather forecasting methods.
 
-### 10.1 Interpretation via a Spiral-Time State Embedding
+### 12.1 Interpretation via a Spiral-Time State Embedding
 
 To interpret these dynamics, we consider an embedding of the observed signals into a triadic state representation
 
@@ -446,19 +500,23 @@ Within this representation several potential advantages arise for early instabil
 
 - **Non-Markovian Memory Effects.** Standard threshold-based monitoring implicitly assumes Markovian dynamics where only the present state matters. The trajectory-based representation instead treats the signal as an evolving path in a higher-dimensional state space. This allows the analysis to distinguish random fluctuations from structured approaches to instability thresholds.
 
-### 10.2 Comparison with Threshold-Based Forecasting
+### 12.2 Comparison with Threshold-Based Forecasting
 
-The windowed variance
+Figures 7 and 8 illustrate that the rolling variance of the X-ray flux,
 
-$$\text{Var}_L[X](t)$$
+$$\text{Var}_L[X](t),$$
 
-can act as a proxy for the system's approach to a critical transition. In conventional monitoring systems, flare detection typically occurs only once the X-ray flux exceeds a predefined threshold. In contrast, the composite indicator
+can act as a statistical proxy for the system's approach to a critical instability threshold. In conventional space-weather monitoring systems, solar flare detection typically occurs only once the observed X-ray flux exceeds a predefined amplitude threshold.
+
+In contrast, the composite instability indicator
 
 $$I(t) = w_1\,\text{Var}_L[X](t) + w_2\,\text{Var}_L[B](t) + w_3\left|\frac{d}{dt}\text{EUV}(t)\right|$$
 
-integrates multiple fluctuation measures and may therefore identify instability windows prior to the onset of the flare itself. Such early-warning signals are consistent with general theoretical expectations for critical transitions in nonlinear dynamical systems.
+integrates multiple fluctuation measures derived from different observational channels. This multi-channel formulation allows the framework to capture increased dynamical activity in the coronal plasma prior to the onset of the flare itself.
 
-### 10.3 Scaling Toward Operational Space Weather Forecasting
+Such variance-based early-warning signatures are consistent with general theoretical expectations for critical transitions in nonlinear dynamical systems, where increased fluctuations, variance growth, and structural variability often precede the transition to an unstable regime.
+
+### 12.3 Scaling Toward Operational Space Weather Forecasting
 
 To reach publication-grade forecasting claims, the next step is scaling from a 7-day window to multi-month or multi-year GOES archives. This will allow the evaluation of statistical forecasting metrics such as ROC curves, AUC scores, false-alarm rates, and lead-time distributions.
 
@@ -466,7 +524,7 @@ Future work will also stratify results by flare class (C, M, and X events) and s
 
 ---
 
-## 11 Conclusion
+## 13 Conclusion
 
 We presented a multi-channel instability screening framework for GOES solar observations based on rolling variance diagnostics and explicit flare event overlays. The approach provides a lightweight method to identify potential pre-flare variability signatures in solar activity time series.
 
