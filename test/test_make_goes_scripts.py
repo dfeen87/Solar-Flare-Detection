@@ -54,6 +54,7 @@ if _SCRIPT_DIR not in sys.path:
 
 import make_goes_figures as mgf        # noqa: E402
 import make_goes_summary_report as mgsr  # noqa: E402
+import make_fig6_goes_flux as mf6        # noqa: E402
 
 # ---------------------------------------------------------------------------
 # Synthetic data helpers
@@ -429,3 +430,36 @@ class TestLoadFlares:
         assert flare_data[0][1] == "M2.3",          "first class must be M2.3"
         assert flare_data[1][0] == syn_times[150], "second onset must be at index 150"
         assert flare_data[1][1] == "X1",            "second class must be X1"
+
+
+# ===========================================================================
+# Tests for make_fig6_goes_flux.py
+# ===========================================================================
+
+
+class TestMakeFig6GoesFlux:
+    """Tests for the standalone make_fig6_goes_flux.py script."""
+
+    def test_make_fig6_creates_png(self, syn_times, syn_flux, tmp_path):
+        """make_fig6 must create a non-empty PNG file."""
+        original_dir = mf6._OUTPUT_DIR
+        mf6._OUTPUT_DIR = str(tmp_path)
+        try:
+            path = mf6.make_fig6(syn_times, syn_flux)
+        finally:
+            mf6._OUTPUT_DIR = original_dir
+
+        assert os.path.isfile(path), "fig6 PNG not created"
+        assert os.path.getsize(path) > 0, "fig6 PNG is empty"
+        assert path.endswith("fig6_goes_xray_flux.png")
+
+    def test_make_fig6_returns_absolute_path(self, syn_times, syn_flux, tmp_path):
+        """make_fig6 must return an absolute path."""
+        original_dir = mf6._OUTPUT_DIR
+        mf6._OUTPUT_DIR = str(tmp_path)
+        try:
+            path = mf6.make_fig6(syn_times, syn_flux)
+        finally:
+            mf6._OUTPUT_DIR = original_dir
+
+        assert os.path.isabs(path), "returned path must be absolute"
