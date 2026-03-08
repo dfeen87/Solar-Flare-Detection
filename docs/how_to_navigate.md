@@ -1,4 +1,4 @@
-# How to Navigate the Solarflare Repository
+# How to Navigate the Solar Flare Detection Repository
 
 ## Folder Structure
 

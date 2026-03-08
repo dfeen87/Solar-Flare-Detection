@@ -1,6 +1,6 @@
-# Solarflare — Project Overview
+# Solar Flare Detection — Project Overview
 
-Solarflare is an educational and computational framework for studying solar
+Solar Flare Detection is an educational and computational framework for studying solar
 flare phenomena using real observational data from the GOES satellite series.
 The project implements the multi-channel instability screening framework
 described in *"Detection of Solar Plasma Instabilities Using Multi-Channel
