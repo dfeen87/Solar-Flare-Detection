@@ -74,15 +74,24 @@ def _load_json(key: str) -> list:
 
 
 def _parse_ts(value: str) -> datetime:
-    """Parse an ISO-8601-like timestamp string into a datetime object."""
+    """Parse an ISO-8601-like timestamp string into a datetime object.
+
+    Returns ``None`` when *value* is ``None`` or cannot be parsed.
+    """
+    if value is None:
+        return None
     # NOAA timestamps look like "2025-01-15T12:34:00Z" or "2025-01-15 12:34:00"
     for fmt in ("%Y-%m-%dT%H:%M:%SZ", "%Y-%m-%dT%H:%M:%S", "%Y-%m-%d %H:%M:%S"):
         try:
             return datetime.strptime(value, fmt)
         except (ValueError, TypeError):
             continue
-    # Last resort: pandas parser
-    return pd.to_datetime(value).to_pydatetime()
+    # Last resort: pandas parser (pd.to_datetime may return None for unparseable
+    # input in some pandas versions, so guard before calling .to_pydatetime())
+    result = pd.to_datetime(value, errors="coerce")
+    if result is None or pd.isna(result):
+        return None
+    return result.to_pydatetime()
 
 
 # ---------------------------------------------------------------------------
