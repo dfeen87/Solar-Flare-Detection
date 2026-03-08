@@ -21,8 +21,16 @@ domains/*/examples_python/output/*.png
 domains/*/examples_python/output/*.pdf
 domains/*/examples_python/output/*.svg
 
-# Top-level pipeline output
-output/
+# Top-level pipeline output — generated files are not committed to version
+# control, but directory-marker .gitkeep files are tracked so that
+# output/paper_figures/ and output/synthetic_pipeline/ exist after a fresh
+# clone and the generation scripts can write their outputs without needing to
+# create the directories themselves.
+output/**
+!output/paper_figures/
+!output/paper_figures/.gitkeep
+!output/synthetic_pipeline/
+!output/synthetic_pipeline/.gitkeep
 
 # macOS
 .DS_Store
