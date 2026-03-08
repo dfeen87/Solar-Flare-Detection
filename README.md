@@ -1,3 +1,8 @@
+[![CI](https://github.com/dfeen87/Solar-Flare-Detection/actions/workflows/ci.yml/badge.svg)](https://github.com/dfeen87/Solar-Flare-Detection/actions/workflows/ci.yml)
+[![Python Tests](https://github.com/dfeen87/Solar-Flare-Detection/actions/workflows/python-tests.yml/badge.svg)](https://github.com/dfeen87/Solar-Flare-Detection/actions/workflows/python-tests.yml)
+[![Julia Tests](https://github.com/dfeen87/Solar-Flare-Detection/actions/workflows/julia-tests.yml/badge.svg)](https://github.com/dfeen87/Solar-Flare-Detection/actions/workflows/julia-tests.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/dfeen87/Solar-Flare-Detection/blob/main/LICENSE)
+
 # ☀️ Solar Flare Detection
 
 Domain‑based solar physics repository combining Python examples with Julia models.  
@@ -177,15 +182,27 @@ See `CITATIONS.md` for full data references.
 ## Repository Structure
 
 ```
-.                                   # Root of the Solarflare repository
+.                                   # Root of the Solar Flare Detection repository
 ├── README.md                       # Project overview, structure, usage
-├── LICENSE                         # MIT license for open-source use
+├── CHANGELOG.md                    # Version history and release notes
 ├── CITATIONS.md                    # Scientific references and data sources
+├── CONTRIBUTING.md                 # Contribution guidelines
+├── LICENSE                         # MIT license for open-source use
+├── PAPER.md                        # Companion research paper draft
+├── requirements.txt                # Python dependencies
 ├── .github/                        # GitHub automation and CI configuration
 │   └── workflows/                  # Continuous integration pipelines
-│       ├── ci.yml                  # Main CI pipeline
-│       ├── python-tests.yml        # Python test suite
-│       └── julia-tests.yml         # Julia test suite
+│       ├── ci.yml                  # Main CI pipeline (lint / import check)
+│       ├── python-tests.yml        # Python test suite (3.10 / 3.11 / 3.12)
+│       └── julia-tests.yml         # Julia test suite (1.10 / 1 latest stable)
+│
+├── shared/                         # Shared Python utilities and Julia helpers
+│   ├── __init__.py                 # Python package init
+│   ├── math_utils.py               # Core mathematical functions
+│   ├── data_loader.py              # GOES/EUVS data loading helpers
+│   ├── plot_utils.py               # Plotting utilities
+│   ├── DataLoader.jl               # Julia data-loading helper
+│   └── README.md                   # Shared layer documentation
 │
 ├── domains/                        # Domain logic and educational examples
 │   ├── spiral_time/                # ψ(t), ΔΦ(t), regime classification
@@ -198,6 +215,18 @@ See `CITATIONS.md` for full data references.
 │   ├── energy_transfer/            # Julia models for energy distribution
 │   ├── topology/                   # Julia models for magnetic topology
 │   └── release_events/             # Julia models for flare event analysis
+│
+├── test/                           # Automated test suite
+│   ├── conftest.py                 # pytest configuration (sys.path setup)
+│   ├── test_math_utils.py          # Unit tests for shared/math_utils.py
+│   ├── test_data_loader.py         # Smoke tests for shared/data_loader.py
+│   ├── test_plot_utils.py          # Smoke tests for shared/plot_utils.py
+│   ├── test_integration_pipeline.py # End-to-end pipeline integration test
+│   ├── runtests.jl                 # Julia master test runner
+│   ├── test_spiral_time.jl         # Julia tests for SpiralTime module
+│   ├── test_energy_transfer.jl     # Julia tests for EnergyTransfer module
+│   ├── test_topology.jl            # Julia tests for Topology module
+│   └── test_release_events.jl      # Julia tests for ReleaseEvents module
 │
 ├── docs/                           # Documentation and educational material
 │   ├── overview.md                 # High-level project overview
