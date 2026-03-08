@@ -332,3 +332,10 @@ Primary reference: Krüger, M. & Feeney, D.M. Jr. (2026). *Detection of Solar Pl
 ## License
 
 This project is licensed under the **MIT License**.
+
+---
+
+## Acknowledgements
+
+The authors gratefully acknowledge the use of AI assistants—specifically Microsoft Copilot and Anthropic Claude—for support in code refinement, documentation editing, and organizational clarity. These tools contributed to improving readability and consistency, while all conceptual development, scientific reasoning, and final implementation decisions were carried out by the authors.
+
