@@ -7,6 +7,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.2.0] — 2026-03-08
+
+### Added
+- New publication-ready figure script:  
+  `domains/spiral_time/examples_python/make_goes_figures.py`  
+  Generates three 300 dpi PNGs in `output/paper_figures/`:
+  - `fig6_goes_xray_flux.png` — semilog GOES 0.1–0.8 nm X-ray flux with UTC timestamps.
+  - `fig7_windowed_variance.png` — rolling variance using `shared/math_utils.rolling_variance` with `L = 200`.
+  - `fig8_flare_event_overlay.png` — flux plot with vertical flare-onset markers from the NOAA catalogue (`begin_time`, fallback to `max_time`).
+- Script is fully reproducible and uses only the existing loader functions (`load_xray_flux`, `load_xray_flares`).  
+  No new dependencies introduced.
+
+### Changed
+- Updated top-level README to synchronize the repository structure with the actual codebase:
+  - Expanded all `domains/*/examples_python/` entries with one-line descriptions for each script.
+  - Expanded all `tools/*/` entries to include `.jl` source files and `Project.toml`.
+  - Added missing `output/` directory tree (`paper_figures/`, `synthetic_pipeline/`).
+  - Added missing `CODE_OF_CONDUCT.md` entry and corrected `SECURITY.md` description.
+  - Enriched `shared/` and `test/` annotations (exported symbols, offline-skip behavior).
+  - Updated *Getting Started → Python* to list all six runnable script paths instead of placeholder examples.
+
+---
+
 ## [1.1.0] - 2026-03-08
 
 ### Added
