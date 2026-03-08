@@ -1,7 +1,7 @@
 # Detection of Solar Plasma Instabilities Using Multi-Channel GOES Observations:
 ## Toward Early Solar Flare Forecasting
 
-**Marcel Krüger**¹\* and **Don Michael Feeney Jr.**²†
+Marcel Krüger**¹ and Don Michael Feeney Jr.²†
 
 ¹ Independent Researcher, Germany
 ² Independent Researcher, USA
