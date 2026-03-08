@@ -72,6 +72,9 @@ Reusable matplotlib plotting helpers that implement the visualization patterns d
 | `plot_rolling_variance(times, variance, L, ax=None, **kwargs)` | §9.2, Figure 7 | Rolling variance evolution |
 | `plot_flare_overlay(times, flux, flare_times, flare_classes, ax=None, **kwargs)` | §9.3, Figure 8 | Flux + class-coded vertical lines |
 | `add_regime_bands(ax, delta_phi_norm, times)` | §6.4 | Colored horizontal regime bands |
+| `plot_delta_phi(times, delta_phi_norm, ax=None, **kwargs)` | §6.2, §6.4, Eq. (6) | Normalized ΔΦ(t) line plot with regime bands |
+| `plot_psi_trajectory(phi, chi, times=None, ax=None, **kwargs)` | §7, §10.1, Eq. (7) | Phase–memory trajectory φ(t) vs χ(t) |
+| `plot_composite_indicator(times, indicator, ax=None, **kwargs)` | §6.1, Eq. (5) | Composite instability indicator I(t) line plot |
 | `style_solar_axes(ax, title=None, ylabel=None)` | — | Consistent grid / font styling |
 
 **Module constant**
@@ -115,6 +118,7 @@ The `test/` directory at the repository root contains pytest-compatible unit tes
 | `test/test_math_utils.py` | All 8 functions in `math_utils.py` (43 tests) |
 | `test/test_data_loader.py` | All 5 loader functions in `data_loader.py` (13 tests) |
 | `test/test_plot_utils.py` | Smoke tests for all `plot_utils.py` functions (22 tests) |
+| `test/test_integration_pipeline.py` | Full end-to-end pipeline integration test (synthetic data, no network) |
 
 ```bash
 # From the repository root — install dependencies first if needed

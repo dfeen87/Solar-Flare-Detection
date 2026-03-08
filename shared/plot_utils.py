@@ -193,6 +193,145 @@ def plot_flare_overlay(
     return fig, ax
 
 
+def plot_delta_phi(times, delta_phi_norm: np.ndarray, ax=None, **kwargs):
+    """Plot normalized ΔΦ(t) with regime bands — PAPER.md §6.2, §6.4, Eq. (6).
+
+    Draws the triadic instability operator ΔΦ(t) as a line plot on the [0, 1]
+    y-axis, automatically overlays the four regime bands via
+    ``add_regime_bands()``, and applies ``style_solar_axes()`` for consistent
+    styling.
+
+    Parameters
+    ----------
+    times : array-like
+        Time values for the x-axis (datetime-compatible or numeric).
+    delta_phi_norm : np.ndarray
+        Normalized ΔΦ(t) values in [0, 1].
+    ax : matplotlib.axes.Axes, optional
+        Existing axes to draw on.  A new figure is created if *None*.
+    **kwargs
+        Extra keyword arguments forwarded to ``ax.plot``.
+
+    Returns
+    -------
+    fig : matplotlib.figure.Figure
+    ax : matplotlib.axes.Axes
+
+    References
+    ----------
+    PAPER.md §6.2, §6.4, Eq. (6).
+    """
+    if ax is None:
+        fig, ax = plt.subplots(figsize=(12, 4))
+    else:
+        fig = ax.figure
+
+    add_regime_bands(ax, delta_phi_norm, times)
+
+    plot_kw = dict(color="#8e44ad", linewidth=0.9, label="ΔΦ(t) — normalized")
+    plot_kw.update(kwargs)
+    ax.plot(times, delta_phi_norm, **plot_kw)
+    ax.set_ylim(0, 1)
+
+    style_solar_axes(ax, ylabel="ΔΦ(t) — normalized")
+    ax.set_xlabel("Time", fontsize=10)
+    return fig, ax
+
+
+def plot_psi_trajectory(phi: np.ndarray, chi: np.ndarray, times=None, ax=None, **kwargs):
+    """Plot the phase–memory trajectory φ(t) vs χ(t) — PAPER.md §7, §10.1, Eq. (7).
+
+    Draws the 2D phase–memory embedding ψ(t) = t + iφ(t) + jχ(t) as a scatter
+    or line plot of φ(t) on the x-axis versus χ(t) on the y-axis.  When
+    *times* is provided the points are colour-coded by time using the
+    ``"plasma"`` colormap.
+
+    Parameters
+    ----------
+    phi : np.ndarray
+        Phase coherence coordinate φ(t) — e.g. ``normalize_01(rolling_correlation(...))``.
+    chi : np.ndarray
+        Memory coordinate χ(t) — e.g. ``compute_chi(var_b, L)``.
+    times : array-like, optional
+        Time values used to colour-code the trajectory.  If *None*, a uniform
+        blue line is drawn instead.
+    ax : matplotlib.axes.Axes, optional
+        Existing axes to draw on.  A new figure is created if *None*.
+    **kwargs
+        Extra keyword arguments forwarded to ``ax.scatter`` (when *times* is
+        provided) or ``ax.plot`` (when *times* is *None*).
+
+    Returns
+    -------
+    fig : matplotlib.figure.Figure
+    ax : matplotlib.axes.Axes
+
+    References
+    ----------
+    PAPER.md §7, §10.1, Eq. (7).
+    """
+    if ax is None:
+        fig, ax = plt.subplots(figsize=(6, 6))
+    else:
+        fig = ax.figure
+
+    if times is not None:
+        t_numeric = np.asarray(times, dtype=float)
+        t_norm = (t_numeric - np.nanmin(t_numeric)) / max(
+            np.nanmax(t_numeric) - np.nanmin(t_numeric), 1e-12
+        )
+        scatter_kw = dict(c=t_norm, cmap="plasma", s=8, alpha=0.7)
+        scatter_kw.update(kwargs)
+        sc = ax.scatter(phi, chi, **scatter_kw)
+        fig.colorbar(sc, ax=ax, label="Time (normalized)")
+    else:
+        plot_kw = dict(color="#2980b9", linewidth=0.8, alpha=0.8)
+        plot_kw.update(kwargs)
+        ax.plot(phi, chi, **plot_kw)
+
+    style_solar_axes(ax, ylabel="χ(t) — Memory")
+    ax.set_xlabel("φ(t) — Phase Coherence", fontsize=10)
+    return fig, ax
+
+
+def plot_composite_indicator(times, indicator: np.ndarray, ax=None, **kwargs):
+    """Plot the composite instability indicator I(t) — PAPER.md §6.1, Eq. (5).
+
+    Parameters
+    ----------
+    times : array-like
+        Time values for the x-axis (datetime-compatible or numeric).
+    indicator : np.ndarray
+        Composite indicator I(t) values (should be in [0, 1] after
+        normalization).
+    ax : matplotlib.axes.Axes, optional
+        Existing axes to draw on.  A new figure is created if *None*.
+    **kwargs
+        Extra keyword arguments forwarded to ``ax.plot``.
+
+    Returns
+    -------
+    fig : matplotlib.figure.Figure
+    ax : matplotlib.axes.Axes
+
+    References
+    ----------
+    PAPER.md §6.1, Eq. (5).
+    """
+    if ax is None:
+        fig, ax = plt.subplots(figsize=(12, 4))
+    else:
+        fig = ax.figure
+
+    plot_kw = dict(color="#27ae60", linewidth=0.9, label="I(t) — Composite Indicator")
+    plot_kw.update(kwargs)
+    ax.plot(times, indicator, **plot_kw)
+
+    style_solar_axes(ax, ylabel="I(t) — Composite Indicator")
+    ax.set_xlabel("Time", fontsize=10)
+    return fig, ax
+
+
 def add_regime_bands(ax, delta_phi_norm: np.ndarray, times) -> None:
     """Add colored horizontal bands for the four regimes to *ax*.
 
