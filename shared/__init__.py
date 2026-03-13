@@ -4,3 +4,4 @@ from shared import data_loader  # noqa: F401  make `from shared.data_loader impo
 
 from .event_evaluation import compute_lead_times, compute_threshold_metrics, compute_roc, compute_auc
 from .precursor_features import compute_delta_phi
+from .composite_features import assemble_precursor_features
