@@ -45,6 +45,75 @@ All timestamps are treated as UTC throughout the pipeline.  No timezone
 conversions are applied after ingestion.  Missing data are represented as
 IEEE 754 NaN values and are excluded from computation at each processing step.
 
+**Real GOES-18 XRS 1-minute data** is shipped in the repository as
+``noaa_goes18_xrs_1m.csv.zip``.  This archive contains a continuous record of
+GOES-18 shortwave (0.05–0.4 nm) and longwave (0.1–0.8 nm) channel measurements
+at one-minute cadence for the calendar year 2024.  Timestamps are stored as
+J2000 epoch seconds (seconds elapsed since 2000-01-01T12:00:00 UTC) and are
+converted to UTC-aware timestamps by ``shared/prepare_real_data.py`` before
+ingestion (see Section 2.1).  Only the quality-filtered masked columns are used;
+raw unmasked measurements are discarded.  Because the XRS CSV does not include
+flare event labels, the flare catalogue is populated as an empty list for all
+real-data intervals, and evaluation metrics reflect signal distribution analysis
+without positive event instances.
+
+---
+
+### 2.1 Real-Data Source Preparation (`shared/prepare_real_data.py`)
+
+The script ``shared/prepare_real_data.py`` converts the raw GOES-18 XRS archive
+into SWPC-format JSON cache files that are read transparently by
+``shared/data_loader.py`` and ``shared/DataLoader.jl``.  No modifications to
+the loaders or experiment scripts are required.
+
+**Steps performed by the script:**
+
+1. Reads ``noaa_goes18_xrs_1m.csv`` from inside ``noaa_goes18_xrs_1m.csv.zip``
+   (macOS metadata entries are skipped automatically).
+2. Converts J2000 epoch seconds to UTC-aware ``pandas.Timestamp`` values using
+   vectorised arithmetic.
+3. Drops rows where ``longwave_masked`` or ``shortwave_masked`` are NaN, removes
+   duplicate timestamps (keeping the last occurrence), and sorts by time.
+4. Re-indexes the series to a uniform 1-minute grid and linearly interpolates
+   residual gaps up to 60 minutes; any remaining NaN rows are dropped.
+5. For each of four fixed calendar intervals (Section 9.2), slices the cleaned
+   DataFrame and writes five SWPC-format JSON cache files under
+   ``data/raw/goes/<dataset_key>/<start>_to_<end>.json``.
+
+**Channel mapping to pipeline datasets:**
+
+| Pipeline dataset    | Source column         | Derivation |
+|---------------------|-----------------------|------------|
+| ``xray_flux``       | ``longwave_masked``   | Direct (0.1–0.8 nm; energy key `"0.1-0.8nm"`) |
+| ``xray_background`` | ``longwave_masked``   | 12-hour (720-point) rolling median |
+| ``magnetometer``    | ``longwave_masked``   | Normalised proxy: He(t) = 100 + (x − μ)/σ × 10 nT |
+| ``euvs``            | ``shortwave_masked``  | Direct (0.05–0.4 nm; field `"e_low"`) |
+| ``flare_catalogue`` | —                     | Empty list (no flare labels in the CSV) |
+
+The magnetometer He proxy centres the derived field around 100 nT (a typical
+quiet-Sun value) with ±10 nT variation proportional to the X-ray flux
+variability, ensuring that the downstream ΔΦ(t) operator produces a
+non-trivial, physically motivated signal.
+
+**Usage:**
+
+Run once before executing any real-data experiment script:
+
+```bash
+python shared/prepare_real_data.py
+```
+
+An optional ``--zip-path`` argument overrides the default ZIP location at the
+repository root:
+
+```bash
+python shared/prepare_real_data.py --zip-path /path/to/noaa_goes18_xrs_1m.csv.zip
+```
+
+Cache files are written to ``data/raw/goes/`` and are excluded from version
+control (see ``.gitignore``).  Re-running the script is idempotent: existing
+cache files are overwritten.
+
 ---
 
 ## 3. Precursor Construction
@@ -202,7 +271,15 @@ a time-indexed scalar column in a pandas DataFrame.
 
 ## 9. Reproducible Evaluation Intervals
 
-Three standard evaluation intervals are provided for manuscript analysis:
+Two families of evaluation intervals are provided: **synthetic** intervals with
+a rolling end date tied to the run date, and **real-data** intervals with fixed
+2024 calendar dates drawn from the real GOES-18 XRS 1-minute dataset.  Both
+families use the same underlying pipeline (``experiments/run_interval_eval.py``)
+and produce identically structured JSON results.
+
+### 9.1 Synthetic Intervals (Rolling Window)
+
+Three synthetic intervals are provided for manuscript analysis:
 
 - **1 month** — covers the 30-day period immediately preceding the run date.
 - **6 months** — covers the 182-day period immediately preceding the run date.
@@ -212,8 +289,6 @@ Each interval is executed via a dedicated script in the `experiments/`
 directory and produces structured JSON results in `results/`.  These intervals
 correspond to the ranges used in the paper and allow exact regeneration of all
 reported metrics and shuffle-test statistics.
-
-### Scripts
 
 | Script | Interval | Output |
 |--------|----------|--------|
@@ -226,7 +301,7 @@ accepts arbitrary `--start` / `--end` date arguments and supports optional
 `--value-col`, `--n-shuffles`, `--random-state`, and `--output` flags for
 full parametric control.
 
-### Example
+**Example:**
 
 ```bash
 python experiments/eval_one_month.py --n-shuffles 500 --random-state 0
@@ -244,7 +319,44 @@ python experiments/run_interval_eval.py \
     --output results/eval_2024-01-01_to_2024-02-01.json
 ```
 
-### Output schema
+---
+
+### 9.2 Real-Data Fixed Intervals (GOES-18 2024)
+
+Four fixed-date intervals are derived from the real GOES-18 XRS 1-minute
+archive (``noaa_goes18_xrs_1m.csv.zip``).  All intervals share the common
+start date 2024-01-01T00:00:00 UTC.  The data cache must be generated by
+``shared/prepare_real_data.py`` (Section 2.1) before running these scripts.
+
+| Script | Interval | Start | End (exclusive) | Output |
+|--------|----------|-------|-----------------|--------|
+| `experiments/eval_one_month_real.py`   | 1 month  | 2024-01-01 | 2024-01-31 | `results/eval_one_month_real.json`   |
+| `experiments/eval_three_month_real.py` | 3 months | 2024-01-01 | 2024-04-01 | `results/eval_three_month_real.json` |
+| `experiments/eval_six_month_real.py`   | 6 months | 2024-01-01 | 2024-07-01 | `results/eval_six_month_real.json`   |
+| `experiments/eval_one_year_real.py`    | 1 year   | 2024-01-01 | 2024-12-31 | `results/eval_one_year_real.json`    |
+
+**Complete real-data validation workflow:**
+
+```bash
+# Step 1 – prepare cache files (run once)
+python shared/prepare_real_data.py
+
+# Step 2 – run all four real-data evaluations
+python experiments/eval_one_month_real.py   --n-shuffles 500 --random-state 0
+python experiments/eval_three_month_real.py --n-shuffles 500 --random-state 0
+python experiments/eval_six_month_real.py   --n-shuffles 500 --random-state 0
+python experiments/eval_one_year_real.py    --n-shuffles 500 --random-state 0
+```
+
+Results are written to the ``results/`` directory in the same JSON schema as
+the synthetic experiments (see Section 9.3 below).  Because the flare catalogue
+is empty for these intervals (the XRS CSV contains no event labels), the
+``lead_times`` and ``threshold_metrics`` arrays will be empty and the AUC
+reflects the signal's self-distribution rather than event-detection performance.
+
+---
+
+### 9.3 Output schema
 
 Each JSON artifact produced by the scripts follows this schema:
 
@@ -269,13 +381,16 @@ is fixed.
 
 ---
 
-## 10. Experimental Results (1 Month, 6 Months, 1 Year)
+## 10. Experimental Results — Synthetic Pipeline (1 Month, 6 Months, 1 Year)
 
 This section summarises empirical precursor performance across three standard
-evaluation intervals.  Each interval was evaluated using the event-based
-pipeline (Section 4) with a 500-permutation shuffle test (Section 5) and
-`--random-state 0` for full reproducibility.  The evaluation column is
-`delta_phi` in all cases.
+evaluation intervals produced by the **synthetic** experiment scripts
+(Section 9.1).  These results use GOES data fetched via the live NOAA SWPC
+feeds (or the synthetic fallback when network access is unavailable) and rolling
+end dates anchored to the script run date.  Each interval was evaluated using
+the event-based pipeline (Section 4) with a 500-permutation shuffle test
+(Section 5) and `--random-state 0` for full reproducibility.  The evaluation
+column is `delta_phi` in all cases.
 
 Results were obtained by executing:
 
@@ -377,3 +492,95 @@ These results support the conclusion that ΔΦ(t) carries reproducible
 precursor information for solar flares at timescales from one month to one
 year, motivating further physical investigation and operational development of
 the signal.
+
+---
+
+## 11. Real-Data Validation Workflow (GOES-18 2024)
+
+This section describes the end-to-end procedure for validating ΔΦ(t) against
+real GOES-18 XRS 1-minute measurements spanning the full calendar year 2024.
+The workflow uses the fixed intervals introduced in Section 9.2 and is entirely
+independent of the synthetic pipeline described in Section 10.
+
+### 11.1 Prerequisites
+
+- Python ≥ 3.9 with ``numpy``, ``pandas``, and ``matplotlib`` installed
+  (see ``requirements.txt``).
+- The file ``noaa_goes18_xrs_1m.csv.zip`` must be present in the repository
+  root (it is tracked in version control).
+
+### 11.2 Data Preparation
+
+Run the preparation script once to convert the raw archive into pipeline-ready
+JSON caches:
+
+```bash
+python shared/prepare_real_data.py
+```
+
+The script prints progress messages and writes up to 20 cache files (5 dataset
+types × 4 intervals) under ``data/raw/goes/``.  Typical output:
+
+```
+[prepare_real_data] Reading noaa_goes18_xrs_1m.csv.zip …
+[prepare_real_data] Loaded 525,600 rows (2024-01-01 00:00:00+00:00 — 2024-12-31 23:59:00+00:00)
+[prepare_real_data] 1-month: 43,200 rows (2024-01-01 — 2024-01-31, excl.)
+  ✓ data/raw/goes/xray_flux/2024-01-01_to_2024-01-31.json  (43,200 records)
+  …
+[prepare_real_data] All cache files written successfully.
+```
+
+### 11.3 Running the Evaluations
+
+Execute each experiment script with the desired shuffle count and random seed:
+
+```bash
+python experiments/eval_one_month_real.py   --n-shuffles 500 --random-state 0
+python experiments/eval_three_month_real.py --n-shuffles 500 --random-state 0
+python experiments/eval_six_month_real.py   --n-shuffles 500 --random-state 0
+python experiments/eval_one_year_real.py    --n-shuffles 500 --random-state 0
+```
+
+Each script reads data exclusively from the local cache files written by Step
+11.2 and writes its result to the corresponding file in ``results/``:
+
+| Script | Output |
+|--------|--------|
+| `eval_one_month_real.py`   | `results/eval_one_month_real.json`   |
+| `eval_three_month_real.py` | `results/eval_three_month_real.json` |
+| `eval_six_month_real.py`   | `results/eval_six_month_real.json`   |
+| `eval_one_year_real.py`    | `results/eval_one_year_real.json`    |
+
+### 11.4 Interpreting Real-Data Results
+
+Because the XRS CSV does not include flare event labels, the flare catalogue
+injected by ``prepare_real_data.py`` is an empty list.  As a consequence:
+
+- ``lead_times`` and ``threshold_metrics`` arrays in the result JSON are empty.
+- The AUC reflects the self-distributional properties of the ΔΦ(t) signal
+  rather than event-detection performance.
+- The shuffle test remains valid as a check of temporal structure within the
+  signal itself: a significantly elevated AUC relative to the null distribution
+  indicates non-random temporal organisation of the precursor values.
+
+To obtain event-detection metrics against real GOES-18 data, supplement the
+cache with a flare catalogue (e.g., from the NOAA GOES flare event list for
+2024, available at https://www.ngdc.noaa.gov/stp/space-weather/solar-data/solar-features/solar-flares/x-rays/goes/
+) serialised in SWPC format under
+``data/raw/goes/flare_catalogue/2024-01-01_to_<end>.json``.  Each record in
+that file must contain at least a ``"time_tag"`` field (ISO-8601 UTC onset
+time) matching the schema expected by ``shared/data_loader.py``.
+
+### 11.5 Relationship to Synthetic Results
+
+The synthetic experiments (Section 10) and the real-data experiments described
+in this section exercise the same pipeline code and produce identically
+structured JSON output.  The key differences are:
+
+| Aspect | Synthetic (Section 10) | Real-data (Section 11) |
+|--------|------------------------|------------------------|
+| Data source | Live NOAA SWPC feeds / fallback | ``noaa_goes18_xrs_1m.csv.zip`` |
+| Interval definition | Rolling (30 / 182 / 365 days before run date) | Fixed 2024 calendar dates |
+| Flare catalogue | Populated from SWPC event list | Empty (no event labels in CSV) |
+| Number of intervals | 3 | 4 (adds 3-month) |
+| Reproducibility | Requires `--random-state` + network snapshot | Fully deterministic once cache is prepared |
