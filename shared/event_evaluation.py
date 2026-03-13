@@ -153,18 +153,18 @@ def compute_lead_times(
 
         rows.append(row)
 
+    _cols = [
+        "onset_time",
+        "lead_time_first_crossing_hours",
+        "lead_time_max_signal_hours",
+        "first_crossing_time",
+        "max_signal_time",
+    ]
+    if not rows:
+        return pd.DataFrame(columns=_cols)
     result = pd.DataFrame(rows)
     # Ensure column order
-    result = result[
-        [
-            "onset_time",
-            "lead_time_first_crossing_hours",
-            "lead_time_max_signal_hours",
-            "first_crossing_time",
-            "max_signal_time",
-        ]
-    ]
-    return result
+    return result[_cols]
 
 
 # ---------------------------------------------------------------------------

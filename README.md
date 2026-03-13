@@ -403,8 +403,13 @@ JSON artifact in `results/`.
 |--------|----------|-----------------|
 | [`experiments/run_interval_eval.py`](experiments/run_interval_eval.py) | Any `[start, end)` interval (parametric) | user-defined path |
 | [`experiments/eval_one_month.py`](experiments/eval_one_month.py) | Most recent 30 days | `results/eval_one_month.json` |
+| [`experiments/eval_three_month.py`](experiments/eval_three_month.py) | Most recent 90 days | `results/eval_three_month.json` |
 | [`experiments/eval_six_months.py`](experiments/eval_six_months.py) | Most recent 182 days | `results/eval_six_months.json` |
 | [`experiments/eval_one_year.py`](experiments/eval_one_year.py) | Most recent 365 days | `results/eval_one_year.json` |
+| [`experiments/eval_one_month_real.py`](experiments/eval_one_month_real.py) | 2024-01-01 → 2024-01-31 (real GOES-18) | `results/eval_one_month_real.json` |
+| [`experiments/eval_three_month_real.py`](experiments/eval_three_month_real.py) | 2024-01-01 → 2024-03-31 (real GOES-18) | `results/eval_three_month_real.json` |
+| [`experiments/eval_six_month_real.py`](experiments/eval_six_month_real.py) | 2024-01-01 → 2024-07-01 (real GOES-18) | `results/eval_six_month_real.json` |
+| [`experiments/eval_one_year_real.py`](experiments/eval_one_year_real.py) | 2024-01-01 → 2024-12-31 (real GOES-18) | `results/eval_one_year_real.json` |
 
 Each script delegates to `run_interval_eval`, which:
 
@@ -454,6 +459,87 @@ python experiments/run_interval_eval.py \
 > **Note:** If real NOAA data is unavailable, the synthetic loaders in
 > `domains/spiral_time/examples_python/synthetic_pipeline_numbers.py` can be used to exercise
 > the pipeline with generated data.
+
+---
+
+## Reproducing the Real GOES-18 Results
+
+The repository ships with compressed GOES-18 XRS 1-minute flux data for the full
+2024–2025 period:
+
+```
+noaa_goes18_xrs_1m.csv.zip       ← ZIP containing noaa_goes18_xrs_1m.csv
+```
+
+### Data preparation
+
+Run the preparation script **once** before the experiment scripts.
+It reads the ZIP, cleans the data, and writes SWPC-format JSON cache files
+under `data/raw/goes/` (excluded from Git; generated at runtime):
+
+```bash
+python shared/prepare_real_data.py
+```
+
+The script derives four aligned intervals from **t₀ = 2024-01-01** (the
+earliest timestamp in the file):
+
+| Interval | Start      | End (excl.) | timedelta |
+|----------|------------|-------------|-----------|
+| 1-month  | 2024-01-01 | 2024-01-31  | +30 days  |
+| 3-month  | 2024-01-01 | 2024-03-31  | +90 days  |
+| 6-month  | 2024-01-01 | 2024-07-01  | +182 days |
+| 1-year   | 2024-01-01 | 2024-12-31  | +365 days |
+
+For each interval **and** each pipeline dataset (`xray_flux`, `xray_background`,
+`magnetometer`, `euvs`, `flare_catalogue`) a cache file is written at:
+
+```
+data/raw/goes/<dataset_key>/<start>_to_<end>.json
+```
+
+`shared/data_loader.py` reads these files transparently — no modifications to
+the data loaders or experiment scripts are required.
+
+**Channel mapping from the CSV:**
+
+| Pipeline dataset   | Source column           | Notes |
+|--------------------|-------------------------|-------|
+| `xray_flux`        | `longwave_masked`        | 0.1–0.8 nm; energy key `"0.1-0.8nm"` |
+| `xray_background`  | `longwave_masked` (12 h rolling median) | quiet-Sun baseline |
+| `magnetometer` He  | `longwave_masked` (normalised) | proxy: centred at 100 nT, ±10 nT |
+| `euvs` e\_low      | `shortwave_masked`       | 0.05–0.4 nm; used as EUV proxy |
+| `flare_catalogue`  | *(empty)*               | no flare detection applied to CSV |
+
+### Running the real-data experiments
+
+After `prepare_real_data.py` has run, execute any (or all) of:
+
+```bash
+python experiments/eval_one_month_real.py   --n-shuffles 500 --random-state 0
+python experiments/eval_three_month_real.py --n-shuffles 500 --random-state 0
+python experiments/eval_six_month_real.py   --n-shuffles 500 --random-state 0
+python experiments/eval_one_year_real.py    --n-shuffles 500 --random-state 0
+```
+
+Each script writes its result to `results/eval_<interval>_real.json` (a
+`_real` suffix is used throughout to avoid overwriting the synthetic results).
+
+### Julia real-data loader
+
+`shared/RealDataLoader.jl` provides Julia equivalents for all five pipeline
+datasets, reading from the same cache files produced by `prepare_real_data.py`:
+
+```julia
+include("shared/RealDataLoader.jl")
+using .RealDataLoader
+
+flux  = load_xray_flux_real("2024-01-01", "2024-01-31")
+magn  = load_magnetometer_real("2024-01-01", "2024-01-31")
+euv   = load_euvs_real("2024-01-01", "2024-01-31")
+```
+
+The returned NamedTuples match the interface of `shared/DataLoader.jl`.
 
 ---
 
