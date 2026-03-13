@@ -1,6 +1,9 @@
 # Downloaded data files — fetched at runtime from NOAA SWPC
 assets/data/**/*.json
 
+# Long-range cached GOES JSON — fetched at runtime from NOAA SWPC
+data/raw/goes/**/*.json
+
 # Python
 __pycache__/
 *.py[cod]
