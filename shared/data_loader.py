@@ -179,7 +179,7 @@ def _iter_7d_windows(start_dt: datetime, end_dt: datetime):
     while cursor < end_dt:
         win_end = min(cursor + step, end_dt)
         windows.append((cursor, win_end))
-        cursor = cursor + step
+        cursor += step
     return windows
 
 
