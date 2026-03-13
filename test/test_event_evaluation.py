@@ -275,11 +275,11 @@ class TestAUC:
         assert compute_auc(fpr, tpr) == pytest.approx(0.75)
 
     def test_shape_mismatch_raises(self):
-        with pytest.raises(ValueError, match="1D arrays of the same length"):
+        with pytest.raises(ValueError, match="1D arrays of the same length >= 2"):
             compute_auc([0.0, 1.0], [0.0])
 
     def test_too_few_points_raises(self):
-        with pytest.raises(ValueError, match="1D arrays of the same length"):
+        with pytest.raises(ValueError, match="same length >= 2"):
             compute_auc([0.0], [0.0])
 
     def test_nan_handling(self):
