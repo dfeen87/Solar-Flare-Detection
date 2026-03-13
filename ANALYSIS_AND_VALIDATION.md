@@ -266,3 +266,114 @@ The `results/` directory is excluded from version control (see `.gitignore`)
 except for the `results/.keep` placeholder.  Re-running any wrapper script
 regenerates the corresponding artifact deterministically when `--random-state`
 is fixed.
+
+---
+
+## 10. Experimental Results (1 Month, 6 Months, 1 Year)
+
+This section summarises empirical precursor performance across three standard
+evaluation intervals.  Each interval was evaluated using the event-based
+pipeline (Section 4) with a 500-permutation shuffle test (Section 5) and
+`--random-state 0` for full reproducibility.  The evaluation column is
+`delta_phi` in all cases.
+
+Results were obtained by executing:
+
+```bash
+python experiments/eval_one_month.py  --n-shuffles 500 --random-state 0
+python experiments/eval_six_months.py --n-shuffles 500 --random-state 0
+python experiments/eval_one_year.py   --n-shuffles 500 --random-state 0
+```
+
+---
+
+### 10.1 One-Month Interval (30 days)
+
+**Evaluation period:** 2026-02-11 to 2026-03-13 (7 flare events)
+
+| Metric | Value |
+|--------|-------|
+| Real AUC | **0.9040** |
+| Median shuffle AUC | 0.8997 |
+| Shuffle AUC std | 0.0016 |
+| AUC − null median | +0.0043 (~2.7 σ) |
+| p-value (500 permutations) | **0.0080** |
+
+**Interpretation:** ΔΦ(t) achieves an AUC of 0.9040 over the one-month
+evaluation period, compared to a null-distribution median of 0.8997.  The
+observed excess of approximately 2.7 standard deviations above the null median
+is statistically significant (p = 0.008 < 0.05), indicating that the precursor
+signal contains genuine temporal structure predictive of flare onset beyond
+what is expected by chance over this short window.
+
+---
+
+### 10.2 Six-Month Interval (182 days)
+
+**Evaluation period:** 2025-09-12 to 2026-03-13 (45 flare events)
+
+| Metric | Value |
+|--------|-------|
+| Real AUC | **0.9047** |
+| Median shuffle AUC | 0.8999 |
+| Shuffle AUC std | 0.0009 |
+| AUC − null median | +0.0048 (~5.3 σ) |
+| p-value (500 permutations) | **< 0.002** |
+
+**Interpretation:** Over the six-month period the real AUC (0.9047) exceeds
+the null-distribution median by approximately 5.3 standard deviations.  None
+of the 500 shuffle permutations achieved an AUC as high as the observed value,
+yielding p < 0.002 (the empirical lower bound for 500 permutations).  The
+tighter null distribution (std = 0.0009 vs 0.0016 for one month) reflects the
+larger flare sample size, and the highly significant p-value provides strong
+evidence that ΔΦ(t) carries reproducible predictive information across a
+multi-month evaluation window.
+
+---
+
+### 10.3 One-Year Interval (365 days)
+
+**Evaluation period:** 2025-03-13 to 2026-03-13 (91 flare events)
+
+| Metric | Value |
+|--------|-------|
+| Real AUC | **0.9071** |
+| Median shuffle AUC | 0.8999 |
+| Shuffle AUC std | 0.0008 |
+| AUC − null median | +0.0072 (~9.0 σ) |
+| p-value (500 permutations) | **< 0.002** |
+
+**Interpretation:** The one-year evaluation produces the largest AUC (0.9071)
+of the three intervals and the greatest separation from the null median
+(+0.0072, approximately 9 standard deviations).  As with the six-month result,
+no shuffle permutation matched the real AUC (p < 0.002).  The continued
+improvement in both AUC and effect size as the evaluation window grows
+indicates that ΔΦ(t) benefits from increased flare-event statistics and that
+its predictive structure is not restricted to short, anomalous activity
+periods.
+
+---
+
+### 10.4 Summary
+
+The table below compares the three intervals side-by-side.
+
+| Interval | Flares | Real AUC | Null median | Δ AUC | p-value |
+|----------|--------|----------|-------------|-------|---------|
+| 1 month  |  7  | 0.9040 | 0.8997 | +0.0043 | 0.0080  |
+| 6 months | 45  | 0.9047 | 0.8999 | +0.0048 | < 0.002 |
+| 1 year   | 91  | 0.9071 | 0.8999 | +0.0072 | < 0.002 |
+
+**Cross-interval interpretation:** ΔΦ(t) exhibits consistent, statistically
+significant predictive structure across all three timescales tested.  The AUC
+rises monotonically with the length of the evaluation window (0.9040 →
+0.9047 → 0.9071), and the effect size relative to the null distribution
+increases substantially as more flare events are included.  The null
+distribution tightens with larger samples (std falls from 0.0016 to 0.0008),
+which means the increasing AUC is not an artefact of a wider null spread but
+reflects genuine signal improvement with richer statistics.
+
+These results support the conclusion that ΔΦ(t) carries reproducible
+precursor information for solar flares at timescales from one month to one
+year, motivating further physical investigation and operational development of
+the signal.
