@@ -194,13 +194,15 @@ See `CITATIONS.md` for full data references.
 ```
 .                                        # Root of the Solar Flare Detection repository
 ├── README.md                            # Project overview, structure, and usage
+├── ANALYSIS_AND_VALIDATION.md           # Full scientific methodology, shuffle-test null model,
+│                                        #   and experimental results (Section 10)
 ├── CHANGELOG.md                         # Version history and release notes
 ├── CITATIONS.md                         # Scientific references and data sources
 ├── CODE_OF_CONDUCT.md                   # Community standards (Contributor Covenant)
 ├── CONTRIBUTING.md                      # Contribution guidelines and workflow
 ├── SECURITY.md                          # Security policy and supported versions
 ├── LICENSE                              # MIT license for open-source use
-├── PEER_REVIEW                          # Code review for Peer Review
+├── PEER_REVIEW.md                       # Code review for Peer Review
 ├── PAPER.md                             # Companion research paper draft (Krüger & Feeney, 2026)
 ├── requirements.txt                     # Python runtime dependencies
 │
@@ -216,9 +218,23 @@ See `CITATIONS.md` for full data references.
 │   ├── math_utils.py                    # Core math: rolling_variance, rolling_correlation,
 │   │                                    #   compute_delta_phi, classify_regime, compute_chi, …
 │   ├── plot_utils.py                    # Reusable matplotlib helpers (flare overlay, ΔΦ bands, …)
+│   ├── precursor_features.py            # compute_delta_phi: ΔΦ(t) from He-component time series
+│   ├── composite_features.py            # assemble_precursor_features: merge ΔΦ, X-ray, EUV tables
+│   ├── event_evaluation.py              # Event-based evaluation helpers (lead-time windows, …)
 │   ├── DataLoader.jl                    # Julia mirror of data_loader.py
 │   ├── MathUtils.jl                     # Julia mirror of math_utils.py (normalize_01, …)
 │   └── README.md                        # Shared layer API documentation
+│
+├── analysis/                            # Statistical analysis modules
+│   ├── __init__.py                      # Python package init
+│   ├── precursor_evaluation.py          # evaluate_precursor: threshold sweep, ROC/AUC computation
+│   └── shuffle_test.py                  # run_shuffle_test: permutation null model for significance
+│
+├── experiments/                         # Reproducible evaluation scripts (manuscript intervals)
+│   ├── run_interval_eval.py             # Parametric runner: any [start, end) interval → JSON artifact
+│   ├── eval_one_month.py                # 30-day evaluation → results/eval_one_month.json
+│   ├── eval_six_months.py               # 182-day evaluation → results/eval_six_months.json
+│   └── eval_one_year.py                 # 365-day evaluation → results/eval_one_year.json
 │
 ├── domains/                             # Domain-scoped Python examples (educational layer)
 │   │
@@ -226,6 +242,7 @@ See `CITATIONS.md` for full data references.
 │   │   ├── README.md                    # Domain overview and equations
 │   │   └── examples_python/
 │   │       ├── full_pipeline_demo.py    # Complete 10-step PAPER.md pipeline (real GOES data)
+│   │       ├── make_fig6_goes_flux.py   # Publication figure 6: semilog GOES X-ray flux
 │   │       ├── make_goes_figures.py     # Publication figures 6–8: flux, variance, flare overlay
 │   │       ├── make_goes_summary_report.py    # CSV tables + figures 6–8 + PDF summary report
 │   │       ├── synthetic_pipeline_numbers.py  # Synthetic 7-day dataset; prints numerical tables
@@ -269,7 +286,14 @@ See `CITATIONS.md` for full data references.
 │   ├── conftest.py                      # pytest configuration (sys.path setup)
 │   ├── test_math_utils.py               # Unit tests for shared/math_utils.py
 │   ├── test_data_loader.py              # Smoke tests for shared/data_loader.py (skip if offline)
+│   ├── test_data_loader_long_range.py   # Long-range data loader tests
 │   ├── test_plot_utils.py               # Smoke tests for shared/plot_utils.py
+│   ├── test_composite_features.py       # Tests for shared/composite_features.py
+│   ├── test_precursor_features.py       # Tests for shared/precursor_features.py
+│   ├── test_event_evaluation.py         # Tests for shared/event_evaluation.py
+│   ├── test_precursor_evaluation.py     # Tests for analysis/precursor_evaluation.py
+│   ├── test_shuffle_test.py             # Tests for analysis/shuffle_test.py
+│   ├── test_make_goes_scripts.py        # Tests for make_goes_figures / make_goes_summary_report
 │   ├── test_integration_pipeline.py     # End-to-end pipeline integration test (synthetic data)
 │   ├── runtests.jl                      # Julia master test runner
 │   ├── test_math_utils.jl               # Julia tests for MathUtils module
@@ -294,6 +318,9 @@ See `CITATIONS.md` for full data references.
 │       ├── delta_phi_regime_bands.png
 │       ├── psi_trajectory.png
 │       └── composite_indicator.png
+│
+├── results/                             # JSON evaluation artifacts (git-ignored except .keep)
+│   └── .keep
 │
 └── docs/                                # Documentation and educational material
     ├── overview.md                      # High-level project overview
@@ -367,6 +394,70 @@ julia tools/run_pipeline.jl
 cd tools/<domain>
 julia --project
 ```
+
+---
+
+## Experiments
+
+The `experiments/` directory contains reproducible evaluation scripts used in the manuscript.
+Each script runs the full precursor evaluation pipeline over a fixed time interval, producing a
+JSON artifact in `results/`.
+
+| Script | Interval | Output artifact |
+|--------|----------|-----------------|
+| [`experiments/run_interval_eval.py`](experiments/run_interval_eval.py) | Any `[start, end)` interval (parametric) | user-defined path |
+| [`experiments/eval_one_month.py`](experiments/eval_one_month.py) | Most recent 30 days | `results/eval_one_month.json` |
+| [`experiments/eval_six_months.py`](experiments/eval_six_months.py) | Most recent 182 days | `results/eval_six_months.json` |
+| [`experiments/eval_one_year.py`](experiments/eval_one_year.py) | Most recent 365 days | `results/eval_one_year.json` |
+
+Each script delegates to `run_interval_eval`, which:
+
+1. Ingests GOES X-ray, magnetometer, EUV, and flare catalogue data.
+2. Computes ΔΦ(t) from the magnetometer He-component.
+3. Assembles composite features (ΔΦ, X-ray background, EUV).
+4. Runs `evaluate_precursor` over a threshold sweep.
+5. Runs `run_shuffle_test` to generate the permutation null distribution.
+6. Persists structured results as a JSON artifact.
+
+---
+
+## Validation Document
+
+[`ANALYSIS_AND_VALIDATION.md`](ANALYSIS_AND_VALIDATION.md) contains the full scientific
+methodology, shuffle-test null model, and experimental results (Section 10).
+
+---
+
+## How to Reproduce the Results
+
+Real NOAA GOES data is required. Install dependencies first:
+
+```bash
+pip install -r requirements.txt
+```
+
+Then run the evaluation scripts for the desired interval:
+
+```bash
+python experiments/eval_one_month.py  --n-shuffles 500 --random-state 0
+python experiments/eval_six_months.py --n-shuffles 500 --random-state 0
+python experiments/eval_one_year.py   --n-shuffles 500 --random-state 0
+```
+
+Each command writes a JSON artifact to `results/`. For a custom interval use the parametric runner:
+
+```bash
+python experiments/run_interval_eval.py \
+    --start 2024-01-01 \
+    --end   2024-02-01 \
+    --n-shuffles 500 \
+    --random-state 0 \
+    --output results/eval_2024-01.json
+```
+
+> **Note:** If real NOAA data is unavailable, the synthetic loaders in
+> `domains/spiral_time/examples_python/synthetic_pipeline_numbers.py` can be used to exercise
+> the pipeline with generated data.
 
 ---
 
