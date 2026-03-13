@@ -197,3 +197,72 @@ downstream modelling stages without additional refinement or re-evaluation on
 independent data.  The pipeline is designed to make this gate transparent and
 computationally reproducible for any candidate signal that can be expressed as
 a time-indexed scalar column in a pandas DataFrame.
+
+---
+
+## 9. Reproducible Evaluation Intervals
+
+Three standard evaluation intervals are provided for manuscript analysis:
+
+- **1 month** — covers the 30-day period immediately preceding the run date.
+- **6 months** — covers the 182-day period immediately preceding the run date.
+- **1 year** — covers the 365-day period immediately preceding the run date.
+
+Each interval is executed via a dedicated script in the `experiments/`
+directory and produces structured JSON results in `results/`.  These intervals
+correspond to the ranges used in the paper and allow exact regeneration of all
+reported metrics and shuffle-test statistics.
+
+### Scripts
+
+| Script | Interval | Output |
+|--------|----------|--------|
+| `experiments/eval_one_month.py` | 1 month (30 days) | `results/eval_one_month.json` |
+| `experiments/eval_six_months.py` | 6 months (182 days) | `results/eval_six_months.json` |
+| `experiments/eval_one_year.py` | 1 year (365 days) | `results/eval_one_year.json` |
+
+All three wrappers delegate to `experiments/run_interval_eval.py`, which
+accepts arbitrary `--start` / `--end` date arguments and supports optional
+`--value-col`, `--n-shuffles`, `--random-state`, and `--output` flags for
+full parametric control.
+
+### Example
+
+```bash
+python experiments/eval_one_month.py --n-shuffles 500 --random-state 0
+```
+
+or equivalently:
+
+```bash
+python experiments/run_interval_eval.py \
+    --start 2024-01-01 \
+    --end   2024-02-01 \
+    --value-col delta_phi \
+    --n-shuffles 500 \
+    --random-state 0 \
+    --output results/eval_2024-01-01_to_2024-02-01.json
+```
+
+### Output schema
+
+Each JSON artifact produced by the scripts follows this schema:
+
+```json
+{
+  "interval": {"start": "YYYY-MM-DD", "end": "YYYY-MM-DD"},
+  "value_col": "<feature_name>",
+  "real_auc": 0.73,
+  "shuffle_aucs": [0.51, 0.49, ...],
+  "p_value": 0.02,
+  "lead_times": [...],
+  "threshold_metrics": [...],
+  "roc": {"fpr": [...], "tpr": [...], "thresholds": [...]}
+}
+```
+
+All timestamps are ISO-8601 UTC strings; NaN values are serialised as `null`.
+The `results/` directory is excluded from version control (see `.gitignore`)
+except for the `results/.keep` placeholder.  Re-running any wrapper script
+regenerates the corresponding artifact deterministically when `--random-state`
+is fixed.
