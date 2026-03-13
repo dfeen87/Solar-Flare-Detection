@@ -33,6 +33,10 @@ output/**
 !output/synthetic_pipeline/
 !output/synthetic_pipeline/.gitkeep
 
+# Experiment result artifacts — generated at runtime by experiments/
+results/**
+!results/.keep
+
 # macOS
 .DS_Store
 
