@@ -45,7 +45,26 @@ against observed events.
 
 ---
 
+## Statistical Evaluation Layer
+
+The `analysis/` and `experiments/` directories implement the reproducible
+statistical validation pipeline described in
+[`ANALYSIS_AND_VALIDATION.md`](../ANALYSIS_AND_VALIDATION.md).
+
+- **`analysis/precursor_evaluation.py`** — event-based evaluation (lead-time
+  analysis, threshold sweep, ROC curve, AUC).
+- **`analysis/shuffle_test.py`** — permutation null model for statistical
+  significance of precursor AUC.
+- **`experiments/`** — reproducible scripts for the 1-month, 6-month, and
+  1-year evaluation intervals reported in the manuscript.  Results are written
+  to `results/` as JSON artifacts and are fully deterministic when
+  `--random-state` is set.
+
+---
+
 ## Navigation
 
 See [how_to_navigate.md](how_to_navigate.md) for the folder structure guide.
 See [glossary.md](glossary.md) for definitions of all scientific terms.
+See [`ANALYSIS_AND_VALIDATION.md`](../ANALYSIS_AND_VALIDATION.md) for the full
+evaluation methodology and experimental results.
