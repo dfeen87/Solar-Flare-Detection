@@ -147,7 +147,14 @@ The `test/` directory at the repository root contains pytest-compatible unit tes
 |---|---|
 | `test/test_math_utils.py` | All 8 functions in `math_utils.py` (43 tests) |
 | `test/test_data_loader.py` | All 5 loader functions in `data_loader.py` (13 tests) |
+| `test/test_data_loader_long_range.py` | Long-range data loader functions |
 | `test/test_plot_utils.py` | Smoke tests for all `plot_utils.py` functions (22 tests) |
+| `test/test_composite_features.py` | `composite_features.py` — `assemble_precursor_features` |
+| `test/test_precursor_features.py` | `precursor_features.py` — `compute_delta_phi` |
+| `test/test_event_evaluation.py` | `event_evaluation.py` — lead-times, threshold metrics, ROC, AUC |
+| `test/test_precursor_evaluation.py` | `analysis/precursor_evaluation.py` — `evaluate_precursor` |
+| `test/test_shuffle_test.py` | `analysis/shuffle_test.py` — `run_shuffle_test` |
+| `test/test_make_goes_scripts.py` | `make_goes_figures` and `make_goes_summary_report` scripts |
 | `test/test_integration_pipeline.py` | Full end-to-end pipeline integration test (synthetic data, no network) |
 
 ```bash

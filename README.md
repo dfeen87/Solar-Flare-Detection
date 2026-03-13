@@ -313,11 +313,7 @@ See `CITATIONS.md` for full data references.
 │   │   ├── goes_table_c_flare_overlay.csv     # Table C — time_utc | xray_flux | flare_flag | flare_class
 │   │   └── goes_summary_report.pdf      #   PDF report: title page + Fig 6–8 pages with tables
 │   └── synthetic_pipeline/              # Figures from synthetic_pipeline_numbers.py
-│       ├── xray_flux_flare_overlay.png
-│       ├── rolling_variance_x.png
-│       ├── delta_phi_regime_bands.png
-│       ├── psi_trajectory.png
-│       └── composite_indicator.png
+│       └── .gitkeep                     # directory placeholder; PNG outputs generated at runtime
 │
 ├── results/                             # JSON evaluation artifacts (git-ignored except .keep)
 │   └── .keep
