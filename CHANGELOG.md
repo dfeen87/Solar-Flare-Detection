@@ -1,9 +1,56 @@
 # Changelog
 
-All notable changes to this project will be documented in this file.
+## **2.2.0 — NOAA Catalogue Forecasting Release** — 2026-03-14
+**Added**
+- NOAA flare catalogue ingestion (`load_noaa_flare_catalogue`)
+- Flare–ΔΦ alignment helper (`align_flare_onsets`)
+- Precursor‑window evaluation engine (`evaluate_precursor_window`)
+- Full end‑to‑end experiment script (`eval_flare_catalogue.py`)
+- ROC/AUC computation, lead‑time analysis, and ΔΦ(t) visualizations
+- Section 12 of `ANALYSIS_AND_VALIDATION.md` populated with real forecasting results
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+**Results**
+- AUC = 0.7875 over 67 January 2024 flares  
+- Median lead time ≈ 11.34 hours  
+- Balanced threshold θ ≈ 0.19 (TPR 0.88, FPR 0.14)
+
+**Quality**
+- 0 CodeQL alerts  
+- All 229 tests passing  
+
+---
+
+## **2.1.0 — ΔΦ(t) Operator Stabilization** — 2026-03-13
+**Added**
+- Log‑normalized ΔΦ(t) computation for XRS data  
+- Improved backward‑difference operator  
+- Consistent timestamp normalization across ingestion modules  
+
+**Changed**
+- Unified naming conventions for ΔΦ‑related columns  
+- Improved error handling in data loaders  
+
+**Fixed**
+- Minor inconsistencies in XRS flux parsing  
+- Edge‑case timestamp alignment issues  
+
+---
+
+## **2.0.0 — Major Architecture Consolidation** — 2026-03-13
+**Added**
+- Full modularization of shared utilities (`shared/`)  
+- New analysis modules under `analysis/`  
+- Experiment harness structure under `experiments/`  
+- Initial ΔΦ(t) computation pipeline  
+
+**Changed**
+- Restructured repository into stable, documented architecture  
+- Standardized data‑loading interfaces  
+- Introduced versioned scientific documentation (`ANALYSIS_AND_VALIDATION.md`)  
+
+**Removed**
+- Legacy prototype scripts  
+- Deprecated preprocessing utilities  
 
 ---
 
