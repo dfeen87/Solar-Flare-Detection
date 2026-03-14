@@ -7,6 +7,7 @@ compute_lead_times(signal_df, flare_df, *, window_hours=24)
 compute_threshold_metrics(signal_df, flare_df, thresholds)
 compute_roc(signal_df, flare_df, thresholds)
 compute_auc(fpr, tpr)
+align_flare_onsets(flare_df, delta_phi_df, *, time_col="time")
 """
 
 from __future__ import annotations
@@ -285,3 +286,97 @@ def compute_auc(fpr, tpr) -> float:
         tpr_arr = tpr_arr[order]
 
     return float(np.trapezoid(tpr_arr, fpr_arr))
+
+
+# ---------------------------------------------------------------------------
+# Public: align_flare_onsets
+# ---------------------------------------------------------------------------
+
+def align_flare_onsets(
+    flare_df: pd.DataFrame,
+    delta_phi_df: pd.DataFrame,
+    *,
+    time_col: str = "time",
+) -> pd.DataFrame:
+    """Align flare onset times with the ΔΦ(t) timeline.
+
+    For each flare onset *t_k*, finds the nearest timestamp in the ΔΦ(t)
+    series and attaches the corresponding ΔΦ value.
+
+    Parameters
+    ----------
+    flare_df : pd.DataFrame
+        Must contain ``"onset_time"`` column (UTC-aware or parseable).
+    delta_phi_df : pd.DataFrame
+        Must contain *time_col* (UTC timestamp) and ``"delta_phi"`` columns.
+    time_col : str, optional
+        Name of the timestamp column in *delta_phi_df*.  Default ``"time"``.
+
+    Returns
+    -------
+    pd.DataFrame
+        Columns: ``onset_time``, ``aligned_time``, ``delta_phi_at_onset``.
+        One row per flare onset; ``aligned_time`` is the nearest ΔΦ(t)
+        timestamp; ``delta_phi_at_onset`` is the corresponding ΔΦ value.
+
+    Raises
+    ------
+    ValueError
+        If required columns are missing.
+
+    Notes
+    -----
+    When *delta_phi_df* is empty, ``aligned_time`` is NaT and
+    ``delta_phi_at_onset`` is NaN for every flare.
+
+    References
+    ----------
+    PAPER.md §12.2 — precursor-window alignment.
+    """
+    if "onset_time" not in flare_df.columns:
+        raise ValueError("flare_df must contain column: 'onset_time'")
+    if time_col not in delta_phi_df.columns:
+        raise ValueError(f"delta_phi_df must contain column: '{time_col}'")
+    if "delta_phi" not in delta_phi_df.columns:
+        raise ValueError("delta_phi_df must contain column: 'delta_phi'")
+
+    flares = flare_df[["onset_time"]].copy()
+    flares["onset_time"] = pd.to_datetime(flares["onset_time"], utc=True)
+
+    sig = delta_phi_df[[time_col, "delta_phi"]].copy()
+    sig[time_col] = pd.to_datetime(sig[time_col], utc=True)
+    sig = sig.sort_values(time_col).reset_index(drop=True)
+
+    _cols = ["onset_time", "aligned_time", "delta_phi_at_onset"]
+    if sig.empty:
+        result = flares.copy()
+        result["aligned_time"] = pd.NaT
+        result["delta_phi_at_onset"] = np.nan
+        return result[_cols].reset_index(drop=True)
+
+    sig_times = sig[time_col].to_numpy(dtype="datetime64[ns]")
+    sig_values = sig["delta_phi"].to_numpy(dtype=float)
+
+    rows: list[dict] = []
+    for onset in flares["onset_time"]:
+        onset_ns = onset.to_datetime64().astype("datetime64[ns]")
+        idx = int(np.searchsorted(sig_times, onset_ns, side="left"))
+        idx = min(idx, len(sig_times) - 1)
+        if idx > 0:
+            diff_prev = abs(
+                (sig_times[idx - 1] - onset_ns).astype("int64")
+            )
+            diff_curr = abs(
+                (sig_times[idx] - onset_ns).astype("int64")
+            )
+            if diff_prev < diff_curr:
+                idx = idx - 1
+        rows.append({
+            "onset_time": onset,
+            "aligned_time": pd.Timestamp(sig_times[idx]),
+            "delta_phi_at_onset": float(sig_values[idx]),
+        })
+
+    if not rows:
+        return pd.DataFrame(columns=_cols)
+    return pd.DataFrame(rows)[_cols]
