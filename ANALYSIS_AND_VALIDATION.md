@@ -584,3 +584,29 @@ structured JSON output.  The key differences are:
 | Flare catalogue | Populated from SWPC event list | Empty (no event labels in CSV) |
 | Number of intervals | 3 | 4 (adds 3-month) |
 | Reproducibility | Requires `--random-state` + network snapshot | Fully deterministic once cache is prepared |
+
+---
+
+# **12. Flare‑Prediction Evaluation Using NOAA Flare Catalogue**
+
+## **12.1 Data Sources and Interval Alignment**
+This evaluation uses the GOES‑18 XRS time series and the official NOAA flare catalogue for the same interval. All timestamps are normalized to UTC, and flare onset times are defined using the catalogue’s `onset_time` (or `time_begin` when applicable). The two datasets are aligned to create a unified event timeline.
+
+## **12.2 Definition of Precursor Windows**
+For each flare event, a precursor window is defined in the interval **6–24 hours before the flare onset**. This window is used to evaluate whether the instability functional ΔΦ(t) exhibits elevated behavior prior to flare initiation.
+
+## **12.3 ΔΦ(t) Behavior Prior to Flares**
+The ΔΦ(t) operator is computed across the full GOES‑18 timeline. For each flare, ΔΦ(t) is extracted and aligned relative to the flare onset to examine whether precursor signatures appear consistently across events.
+
+## **12.4 Forecasting Metrics**
+Using the aligned ΔΦ(t) and flare timestamps, the following forecasting metrics are computed:
+
+- Receiver Operating Characteristic (ROC) curves  
+- Area Under the Curve (AUC) scores  
+- Lead‑time distributions  
+- False‑alarm and missed‑event rates  
+
+These metrics quantify the predictive skill of ΔΦ(t) as an early‑warning indicator.
+
+## **12.5 Interpretation and Limitations**
+This section summarizes the observed precursor behavior, the strengths and weaknesses of ΔΦ(t) as a forecasting signal, and any limitations arising from data quality, cadence, or event sparsity.
