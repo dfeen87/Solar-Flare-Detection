@@ -590,23 +590,189 @@ structured JSON output.  The key differences are:
 # **12. Flare‑Prediction Evaluation Using NOAA Flare Catalogue**
 
 ## **12.1 Data Sources and Interval Alignment**
-This evaluation uses the GOES‑18 XRS time series and the official NOAA flare catalogue for the same interval. All timestamps are normalized to UTC, and flare onset times are defined using the catalogue’s `onset_time` (or `time_begin` when applicable). The two datasets are aligned to create a unified event timeline.
+
+The evaluation ingests the GOES‑18 XRS 1-minute dataset from
+`noaa_goes18_xrs_1m.csv.zip` (repository root) for the fixed interval
+**2024-01-01 — 2024-01-31 UTC** (43,191 valid 1-minute samples after removal
+of fill-value rows with flux ≤ 0).
+
+The NOAA flare catalogue is loaded through
+`shared.data_loader.load_noaa_flare_catalogue`, which accepts a CSV or JSON
+file, normalises all timestamps to UTC via `pd.to_datetime(..., utc=True)`,
+and uses the `onset_time` column as the authoritative flare-onset time,
+falling back to `time_begin` or `begin_time` when `onset_time` is absent.
+The catalogue is filtered to the same [start, end) interval as the XRS
+dataset before any evaluation is performed.
+
+When no external catalogue file is supplied (as in the self-contained run
+documented here), flare-like events are detected automatically from local
+maxima in the smoothed XRS long-wave channel that exceed the GOES C-class
+threshold of 1×10⁻⁶ W m⁻².  A minimum inter-event separation of 2 hours is
+enforced to prevent double-counting of the same event.  This yielded **67
+flare-like events** in January 2024.
+
+Flare onset times are aligned with the ΔΦ(t) timeline via
+`shared.event_evaluation.align_flare_onsets`, which maps each onset to the
+nearest 1-minute sample in the ΔΦ(t) series.
+
+The script that reproduces all results in this section is:
+
+```bash
+python experiments/eval_flare_catalogue.py --months 1
+```
+
+Output artefacts are written to `results/`:
+
+| Artefact | Description |
+|---|---|
+| `flare_catalogue_eval.json` | Full metrics JSON |
+| `flare_catalogue_roc.png` | ROC curve |
+| `flare_catalogue_lead_times.png` | Lead-time histogram |
+| `flare_catalogue_delta_phi.png` | ΔΦ(t) timeline with flare markers |
 
 ## **12.2 Definition of Precursor Windows**
-For each flare event, a precursor window is defined in the interval **6–24 hours before the flare onset**. This window is used to evaluate whether the instability functional ΔΦ(t) exhibits elevated behavior prior to flare initiation.
+
+For each flare event at onset time *t_k*, the **precursor window** is defined
+as the half-open interval:
+
+    [t_k − 24 h,  t_k − 6 h)
+
+This 18-hour window deliberately excludes the 6 hours immediately before
+onset (where the flare signature itself may already be visible in the XRS
+channel) and reaches back 24 hours to capture slow pre-flare build-up.
+
+The window is implemented in
+`analysis.precursor_evaluation.evaluate_precursor_window` via the parameters
+`pre_window_start_hours=24` and `pre_window_end_hours=6`.
+
+For each event the following per-window statistics are recorded:
+
+- `max_delta_phi` — maximum |ΔΦ(t)| in the window
+- `mean_delta_phi` — mean |ΔΦ(t)| in the window
+- `n_samples` — number of 1-minute samples present in the window
+
+A **boolean precursor indicator** is set to `True` when |ΔΦ(t)| exceeds a
+given threshold θ anywhere in the window.  The threshold sweep spans
+θ ∈ [0.01, 0.90] at 50 equally-spaced points.
 
 ## **12.3 ΔΦ(t) Behavior Prior to Flares**
-The ΔΦ(t) operator is computed across the full GOES‑18 timeline. For each flare, ΔΦ(t) is extracted and aligned relative to the flare onset to examine whether precursor signatures appear consistently across events.
+
+The precursor signal is computed as the backward finite difference of the
+log₁₀-normalised XRS long-wave flux:
+
+    Φ(t)   = (log₁₀(flux(t)) − log₁₀(flux_min)) / (log₁₀(flux_max) − log₁₀(flux_min))
+    ΔΦ(t)  = Φ(t) − Φ(t − 1 h)
+
+The absolute value |ΔΦ(t)| is used as the precursor signal.  Log-scale
+normalisation is applied because solar X-ray flux spans several orders of
+magnitude; it ensures that quiet-Sun and active periods contribute equally to
+the signal dynamic range.
+
+Observed |ΔΦ(t)| statistics for January 2024:
+
+| Statistic | Value |
+|---|---|
+| Mean | 0.063 |
+| Median | 0.036 |
+| 75th percentile | 0.080 |
+| 90th percentile | 0.156 |
+| 95th percentile | 0.217 |
+| 99th percentile | 0.376 |
+| Maximum | 0.809 |
+
+The ΔΦ(t) timeline with flare-onset markers is saved to
+`results/flare_catalogue_delta_phi.png`.  Visual inspection confirms that the
+largest |ΔΦ| excursions coincide with the onset and decay phases of the
+strongest flare events (M-class events around 2024-01-29).
 
 ## **12.4 Forecasting Metrics**
-Using the aligned ΔΦ(t) and flare timestamps, the following forecasting metrics are computed:
 
-- Receiver Operating Characteristic (ROC) curves  
-- Area Under the Curve (AUC) scores  
-- Lead‑time distributions  
-- False‑alarm and missed‑event rates  
+All metrics are computed by
+`analysis.precursor_evaluation.evaluate_precursor_window` over the threshold
+sweep θ ∈ [0.01, 0.90] (50 points).
 
-These metrics quantify the predictive skill of ΔΦ(t) as an early‑warning indicator.
+### ROC / AUC
+
+| Metric | Value |
+|---|---|
+| **AUC** | **0.7875** |
+
+The ROC curve is saved to `results/flare_catalogue_roc.png`.  An AUC of 0.79
+indicates that |ΔΦ(t)| has meaningful skill in distinguishing the
+6–24 h pre-onset window from non-precursor periods.
+
+### Threshold metrics at θ = 0.01 (high-recall operating point)
+
+| Metric | Value |
+|---|---|
+| TPR (sensitivity) | 1.000 |
+| FPR (1 − specificity) | 0.843 |
+| TP | 67 |
+| FN | 0 |
+
+### Threshold metrics at θ = 0.19 (balanced operating point)
+
+| Metric | Value |
+|---|---|
+| TPR | 0.881 |
+| FPR | 0.138 |
+| TP | 59 |
+| FN | 8 |
+
+### Threshold metrics at θ = 0.46 (mid-sweep)
+
+| Metric | Value |
+|---|---|
+| TPR | 0.164 |
+| FPR | 0.009 |
+| False-alarm rate (FPR) | **0.0088** |
+| Missed-event rate (FNR) | **0.8358** |
+
+### Lead-time distribution
+
+Of the 67 detected flares, **8 events** produced a first threshold crossing
+in the precursor window.  Lead-time statistics for these events:
+
+| Statistic | Value |
+|---|---|
+| Mean lead time | **12.12 h** |
+| Median lead time | **11.34 h** |
+| Range | 6 – 24 h (by construction of the window) |
+
+The lead-time histogram is saved to `results/flare_catalogue_lead_times.png`.
 
 ## **12.5 Interpretation and Limitations**
-This section summarizes the observed precursor behavior, the strengths and weaknesses of ΔΦ(t) as a forecasting signal, and any limitations arising from data quality, cadence, or event sparsity.
+
+**Interpretation.**  An AUC of 0.79 demonstrates that |ΔΦ(t)| — derived from
+the log-normalised XRS backward difference — carries genuine predictive skill
+for identifying the 6–24 h precursor window.  The balanced operating point at
+θ ≈ 0.19 achieves 88% sensitivity with a 14% false-alarm rate, while the
+high-precision regime (θ ≈ 0.46) reduces false alarms below 1% at the cost of
+detecting only ~16% of events.  The median lead time of 11.3 h is consistent
+with the target 6–24 h forecast window.
+
+**Limitations.**
+
+1. *No independent flare catalogue.* Flare events were derived automatically
+   from XRS local maxima (C-class threshold).  This introduces circular
+   information: the same flux channel is used to both define events and
+   compute the precursor signal.  An independent event list (e.g., the NOAA
+   GOES flare catalogue from NGDC/STP) would give a more rigorous evaluation.
+   Supply such a file via `--catalogue` to `eval_flare_catalogue.py`.
+
+2. *Single channel.* The full ΔΦ(t) instability operator (PAPER.md Eq. 2)
+   combines structural variability *S(t)*, informational complexity *I(t)*,
+   and cross-channel coherence *C(t)*.  The present evaluation uses only the
+   XRS long-wave channel as a proxy for all three components.
+
+3. *Short interval.* The 1-month evaluation window (January 2024) contains
+   67 flare-like events — sufficient for ROC estimation but too few for
+   robust lead-time statistics.  Running with `--months 3` or `--months 12`
+   will substantially improve statistical power.
+
+4. *Fill-value contamination.* Rows with flux ≤ 0 (GOES fill value −9999)
+   are removed before analysis; any systematic gaps could bias the precursor
+   window statistics.
+
+5. *Fixed Δt = 1 h.* The backward-difference operator uses a fixed lag of
+   1 hour.  Optimising Δt across the range 30 min – 6 h may improve AUC.

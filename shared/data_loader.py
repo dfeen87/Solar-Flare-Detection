@@ -764,3 +764,126 @@ def load_flare_catalogue_range(start, end, *,
     records = _load_swpc_range_raw("flare_catalogue", start_dt, end_dt,
                                    force_refresh=force_refresh)
     return _records_to_flare_catalogue_df(records, start_dt, end_dt)
+
+
+def load_noaa_flare_catalogue(
+    path,
+    *,
+    start=None,
+    end=None,
+) -> pd.DataFrame:
+    """Load NOAA flare catalogue from a local CSV or JSON file.
+
+    Normalizes all timestamps to UTC.  Uses ``onset_time`` as the primary
+    flare-onset column; falls back to ``time_begin`` or ``begin_time`` when
+    absent.  The returned DataFrame is filtered to [start, end) when either
+    bound is provided, matching the GOES-18 XRS dataset interval semantics.
+
+    Parameters
+    ----------
+    path : str or Path
+        Path to a CSV file or a JSON file (array of objects).  File type is
+        inferred from the extension (``.csv`` or ``.json``/``.jsn``).
+    start, end : date-like, optional
+        Half-open interval [start, end).  Accepts ``datetime``, ``date``,
+        or ISO ``YYYY-MM-DD`` strings.
+
+    Returns
+    -------
+    pd.DataFrame
+        Columns: ``onset_time`` (UTC-aware datetime), ``time_begin``,
+        ``time_max``, ``time_end`` (UTC-aware datetime or NaT),
+        ``class_type`` (str), ``class_num`` (float).
+        ``onset_time`` is the authoritative flare-onset time used by the
+        downstream evaluation layer.
+
+    Raises
+    ------
+    FileNotFoundError
+        If *path* does not exist.
+    ValueError
+        If the file extension is not recognised (``.csv`` or ``.json``),
+        or if no recognisable onset-time column is found.
+
+    Notes
+    -----
+    Timestamps are parsed with ``pd.to_datetime(..., utc=True)``; values
+    that cannot be parsed become ``NaT`` and rows with a missing
+    ``onset_time`` are dropped.
+    Range semantics: [start, end) half-open interval.
+
+    References
+    ----------
+    PAPER.md §12 — flare-prediction evaluation using the NOAA catalogue.
+    """
+    path = Path(path)
+    if not path.exists():
+        raise FileNotFoundError(f"Flare catalogue not found: {path}")
+
+    ext = path.suffix.lower()
+    if ext == ".csv":
+        raw = pd.read_csv(path, dtype=str)
+    elif ext in (".json", ".jsn"):
+        with open(path, "r", encoding="utf-8") as fh:
+            raw = pd.DataFrame(json.load(fh))
+    else:
+        raise ValueError(
+            f"Unrecognised file extension '{ext}'; expected .csv or .json"
+        )
+
+    # Normalise column names: strip whitespace, lower-case, underscored
+    raw.columns = [c.strip().lower().replace(" ", "_") for c in raw.columns]
+
+    # Parse all recognised timestamp columns to UTC-aware datetimes
+    _ts_cols = [
+        "onset_time", "time_begin", "time_max", "time_end",
+        "begin_time", "max_time", "end_time",
+    ]
+    for col in _ts_cols:
+        if col in raw.columns:
+            raw[col] = pd.to_datetime(raw[col], errors="coerce", utc=True)
+
+    # Resolve onset_time: prefer onset_time, fall back to time_begin /
+    # begin_time.  This implements the §12.1 requirement.
+    if "onset_time" not in raw.columns or raw["onset_time"].isna().all():
+        for fallback in ("time_begin", "begin_time"):
+            if fallback in raw.columns and not raw[fallback].isna().all():
+                raw["onset_time"] = raw[fallback]
+                break
+        else:
+            raise ValueError(
+                "Flare catalogue must contain an 'onset_time', 'time_begin', "
+                "or 'begin_time' column with parseable UTC timestamps."
+            )
+
+    # Ensure all optional output columns exist (create with NaT / NaN if absent)
+    for col in ("time_begin", "time_max", "time_end"):
+        if col not in raw.columns:
+            raw[col] = pd.NaT
+    if "class_type" not in raw.columns:
+        raw["class_type"] = ""
+    if "class_num" not in raw.columns:
+        raw["class_num"] = float("nan")
+    else:
+        raw["class_num"] = pd.to_numeric(raw["class_num"], errors="coerce")
+
+    # Select and order output columns
+    df = raw[
+        ["onset_time", "time_begin", "time_max", "time_end", "class_type", "class_num"]
+    ].copy()
+
+    # Drop rows where onset_time could not be parsed
+    df = df.dropna(subset=["onset_time"]).reset_index(drop=True)
+
+    # Sort by onset_time ascending
+    df = df.sort_values("onset_time").reset_index(drop=True)
+
+    # Filter to [start, end) if provided
+    if start is not None:
+        start_dt = _normalize_date_input(start)
+        df = df[df["onset_time"] >= start_dt]
+    if end is not None:
+        end_dt = _normalize_date_input(end)
+        df = df[df["onset_time"] < end_dt]
+
+    return df.reset_index(drop=True)
