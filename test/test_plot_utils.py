@@ -22,6 +22,7 @@ from shared.plot_utils import (
     plot_xray_flux,
     plot_rolling_variance,
     plot_flare_overlay,
+    plot_superposed_epoch,
     add_regime_bands,
 )
 from shared.math_utils import rolling_variance
@@ -233,6 +234,54 @@ class TestPlotFlareOverlay:
         """Unknown flare class letter should use fallback color without error."""
         fig, ax = plot_flare_overlay(
             sample_times, sample_flux, sample_times[:1], ["Z"]
+        )
+        plt.close(fig)
+
+
+# ===========================================================================
+# plot_superposed_epoch
+# ===========================================================================
+
+
+class TestPlotSuperposedEpoch:
+    @pytest.fixture()
+    def epoch_data(self):
+        rel_hours = np.linspace(-24, 6, 100)
+        mean = np.abs(np.sin(rel_hours / 3)) * 0.05
+        ci = np.full_like(mean, 0.005)
+        return rel_hours, mean, ci
+
+    def test_returns_fig_and_ax(self, epoch_data):
+        """Returns (fig, ax) tuple with correct types."""
+        rel_hours, mean, ci = epoch_data
+        fig, ax = plot_superposed_epoch(rel_hours, mean, ci, n_flares=10)
+        assert isinstance(fig, plt.Figure)
+        assert hasattr(ax, "plot")
+        plt.close(fig)
+
+    def test_uses_provided_ax(self, epoch_data):
+        """When ax is provided, uses it and returns the same figure."""
+        rel_hours, mean, ci = epoch_data
+        fig_in, ax_in = plt.subplots()
+        fig_out, ax_out = plot_superposed_epoch(
+            rel_hours, mean, ci, n_flares=5, ax=ax_in,
+        )
+        assert fig_out is fig_in
+        assert ax_out is ax_in
+        plt.close(fig_in)
+
+    def test_ylabel_set(self, epoch_data):
+        """Y-axis label should reference ΔΦ."""
+        rel_hours, mean, ci = epoch_data
+        _, ax = plot_superposed_epoch(rel_hours, mean, ci, n_flares=10)
+        assert "ΔΦ" in ax.get_ylabel()
+        plt.close()
+
+    def test_no_exception_with_kwargs(self, epoch_data):
+        """Extra kwargs (e.g., color) are forwarded without error."""
+        rel_hours, mean, ci = epoch_data
+        fig, ax = plot_superposed_epoch(
+            rel_hours, mean, ci, n_flares=10, color="green",
         )
         plt.close(fig)
 
