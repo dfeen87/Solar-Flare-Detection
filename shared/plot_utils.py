@@ -332,6 +332,85 @@ def plot_composite_indicator(times, indicator: np.ndarray, ax=None, **kwargs):
     return fig, ax
 
 
+def plot_superposed_epoch(
+    rel_hours: np.ndarray,
+    mean: np.ndarray,
+    ci: np.ndarray,
+    n_flares: int,
+    *,
+    ax=None,
+    title: str = "Superposed-epoch mean of |ΔΦ(t)| around flare onset",
+    **kwargs,
+):
+    """Plot the superposed-epoch average of |ΔΦ(t)| around flare onsets — §6.4.
+
+    Draws the ensemble mean curve with a 95 % confidence-interval band and a
+    dashed vertical line at *t* = 0 (flare onset).
+
+    Parameters
+    ----------
+    rel_hours : np.ndarray
+        Time axis relative to flare onset (hours); negative = before onset.
+    mean : np.ndarray
+        Ensemble mean of |ΔΦ(t)| at each relative time step.
+    ci : np.ndarray
+        Half-width of the 95 % confidence interval (1.96 × SEM).
+    n_flares : int
+        Number of flare events used in the average (shown in annotation).
+    ax : matplotlib.axes.Axes, optional
+        Existing axes to draw on.  A new figure is created if *None*.
+    title : str, optional
+        Axes title text.
+    **kwargs
+        Extra keyword arguments forwarded to ``ax.plot``.
+
+    Returns
+    -------
+    fig : matplotlib.figure.Figure
+    ax : matplotlib.axes.Axes
+    """
+    if ax is None:
+        fig, ax = plt.subplots(figsize=(7, 3.6))
+    else:
+        fig = ax.figure
+
+    plot_kw = dict(color="#1f3b73", linewidth=2.0, label="Mean |ΔΦ(t)|")
+    plot_kw.update(kwargs)
+    ax.plot(rel_hours, mean, **plot_kw)
+    ax.fill_between(
+        rel_hours,
+        mean - ci,
+        mean + ci,
+        color="#1f3b73",
+        alpha=0.18,
+        linewidth=0,
+    )
+
+    ax.axvline(0.0, color="black", linestyle="--", linewidth=1.2, alpha=0.85)
+
+    ax.set_xlabel("Time relative to flare onset (hours)", fontsize=10)
+    ax.set_xlim(rel_hours[0], rel_hours[-1])
+    style_solar_axes(ax, title=title, ylabel="Mean |ΔΦ(t)|")
+
+    ax.text(
+        0.98,
+        0.95,
+        f"n_flares = {n_flares}",
+        ha="right",
+        va="top",
+        transform=ax.transAxes,
+        fontsize=9,
+        bbox=dict(
+            boxstyle="round,pad=0.25",
+            facecolor="white",
+            alpha=0.85,
+            linewidth=0.0,
+        ),
+    )
+
+    return fig, ax
+
+
 def add_regime_bands(ax, delta_phi_norm: np.ndarray, times) -> None:
     """Add colored horizontal bands for the four regimes to *ax*.
 
